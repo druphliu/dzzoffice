@@ -1,0 +1,194 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/corpus/images/corpus.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script>
+<style>
+html,body{
+	overflow:hidden;
+	background:#FBFBFB;
+}
+.cover-item{
+	margin:10px;position:relative;
+}
+
+.cover-item .delete{
+	display:none;
+}
+.cover-item.hover .delete{
+	display:block;
+}
+.cover-item .progress-container{
+	position:absolute;z-index:100;bottom:10px;left:10px;width:151px;border:1px solid #DDD;
+}
+.bs-main-container{
+	overflow:auto;
+	-webkit-overflow-scrolling: touch;
+}
+</style>
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0">
+      <!--{template corpus_top}--> 
+</nav>
+<div class="bs-container clearfix">
+  <div class="bs-left-container clearfix">
+    	<!--{template setting_left}--> 
+  </div>
+  <div class="left-drager">
+     <div class="left-drager-op"><div class="left-drager-sub"></div></div>
+  </div>
+  <div class="bs-main-container" style="position:relative">
+  	<div class="main-content"  style="position:relative">
+        <div class="main-header2 clearfix">
+            <div class="pull-left" style="position:relative;padding:5px;overflow:hidden">
+                 <button class="btn btn-primary">上传封面</button>
+                 <input id="cover_upload" name="files[]" tabIndex="-1" style="position: absolute;outline:none; filter: alpha(opacity=0); PADDING-BOTTOM: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; font-family: Arial; font-size: 180px;height:40px;width:86px;display:inline-block;top: 0px; cursor: pointer; right: 0px; padding-top: 0px; opacity: 0;direction:ltr;background-image:none" type="file" multiple>
+            </div>
+           <div class="pull-left"  style="padding:5px;"><button class="btn btn-primary needindzz" onclick="uploadfrom_desktop()">从桌面选择</button></div>
+        </div>
+        <div class="clearfix" id="cover_drop" style="padding:15px;border-top:1px solid #FFF">
+          <ul id="cover_container" class=" list-unstyled">
+          <!--{loop $covers $value}-->
+            <li class="pull-left cover-item text-center" data-aid="$value[aid]" > 
+                <a href="javascript:;" style="position:absolute;right:0px;top:0px;" class="delete" title="删除" ><i class="glyphicon glyphicon-remove-sign"></i></a>
+                <img  class="img-thumbnail" src="$value[img]" >
+            </li>
+            <!--{/if}-->
+          </ul>
+        </div>
+  </div>
+  </div>
+</div>
+
+
+<!--{template common/footer_simple}--> 
+
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout();
+jQuery(document).ready(function(e) {
+    jQuery('#cover_container').kpdragsort(null,function(){cover_save();});
+	jQuery(document).on('mouseenter','.cover-item',function(e){
+		jQuery(this).addClass('hover');
+	});
+	jQuery(document).on('mouseleave','.cover-item',function(e){
+		jQuery(this).removeClass('hover');
+	});
+	jQuery(document).on('click','.cover-item .delete',function(e){
+		window.kp_only = true;
+		deleteCover(this);
+		return false;
+	});
+	try{if(!top._config) jQuery('.needindzz').hide();}catch(e){}
+	  
+});
+function uploadfrom_desktop(){
+	top.OpenFile('open','打开文件',{image:['图像(*.jpg,*.jpeg,*.png,*.gif)',['IMAGE','JPG','JPEG','PNG','GIF'],'']},{bz:'',multiple:true},function(data){//只打开本地盘
+		var datas=[];
+		if(data.params.multiple){
+			datas=data.icodata
+		}else{
+			datas=[data.icodata];
+		}
+		var html='';
+		for(var i in datas){
+			var img=DZZSCRIPT+'?mod=io&op=thumbnail&width=130&height=160&path='+(datas[i].apath?datas[i].apath:datas[i].dpath);
+			    html+='<li class="pull-left cover-item text-center" data-aid="'+datas[i].aid+'" >';
+				html+='     <a href="javascript:;" style="position:absolute;right:0px;top:0px;" class="delete"  title="删除"><i class="glyphicon glyphicon-remove-sign"></i></a>';
+				html+='      <a href="javascript:;"><img  class="img-thumbnail" src="'+img+'" ></a>';
+			
+				html+='</li>';
+			
+		}
+		if(html!=''){
+			if(jQuery('#cover_container li:first').size()>0){
+				 jQuery('#cover_container li:first').before(html);
+			}else{
+				 jQuery('#cover_container').append(html);
+			}	
+			jQuery('#cover_container').kpdragsort(null,function(){cover_save();});
+			cover_save();
+		}
+	});
+}
+function deleteCover(obj){
+	var li=jQuery(obj).parent();
+	li.remove();
+	cover_save();
+	window.kp_only = false;
+}
+function cover_save(){
+	var aids=[];
+	jQuery('#cover_container').children().each(function(){
+		var aid=parseInt(jQuery(this).data('aid'));
+		if(aid>0) aids.push(aid);
+	});
+	jQuery.post(DZZSCRIPT+'?mod=corpus&op=setting&do=cover&operation=save',{aids:aids.join(',')});
+}
+jQuery(function () {
+ 'use strict';
+ jQuery('#cover_upload').fileupload({
+        url: DZZSCRIPT+'?mod=corpus&op=setting&do=cover&operation=upload',
+        dataType: 'json',
+		autoUpload: true,
+		maxFileSize: 2000000, // 2 MB
+		maxChunkSize:2000000, //2M
+		acceptFileTypes:new RegExp("(\.|\/)([jpeg|gif|png|bmp])$",'i'),
+		dropZone:jQuery('body'),
+		pasteZone:jQuery('body'),
+		sequentialUploads:true,
+		add:function(e,data){
+			 data.context = jQuery('<li class="pull-left cover-item text-center"></li>');
+			 if(jQuery('#cover_container li:first').size()>0) jQuery('#cover_container li:first').before(data.context);
+			 else{
+				 jQuery('#cover_container').append(data.context);
+			 }
+			jQuery.each(data.files, function (index, file) {
+				if(!file.name) file.name='clipboardData.png';
+				var html='';
+					html+='     <a href="javascript:;" style="position:absolute;right:0px;top:0px;" class="delete" title="删除"><i class="glyphicon glyphicon-remove-sign"></i></a>';
+					html+='      <a href="javascript:;"><img class="img-thumbnail" src="dzz/images/default/upload_failure.png"></a>';
+					html+='      <div class="progress-container" >';
+					html+='  		  <div class="progress active" style="margin:0;" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">';
+					html+='            	<div class="progress-bar progress-bar-success" style="width:0%;"></div>';
+					html+='           </div>';
+					html+='       </div>';
+				jQuery(html).appendTo(data.context);
+			});
+			data.process().done(function () {
+				data.submit();
+			});
+			
+		},
+		progress: function (e,data){
+			 var index = 0;//data.index,
+             var  node = jQuery(data.context.children()[index]);
+			 var progress = parseInt(data.loaded / data.total * 100, 10);
+			 node.find('.progress-bar').css(
+				'width',
+				progress + '%'
+			 );
+		},
+        done: function (e, data) {
+            jQuery.each(data.result.files, function (index, file) {
+				if(file.error){
+					data.context.find('.progress').replaceWith('<span class="text-danger">'+file.error+'</span>');
+				}else{
+					data.context.data('aid',file.data.aid).find('img').attr('src',file.data.img).end().find('.progress-container').hide();
+					jQuery('#cover_container').kpdragsort(null,function(){cover_save();});
+					cover_save();
+				}
+            });
+        }
+    });
+});
+</script>
+<script  type="text/javascript" src="dzz/scripts/jquery.ui.touch.js?{VERHASH}"></script>
+<script type="text/javascript" src="static/js/jquery.kpdragsort.js?{VERHASH}"></script>
+
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.ui.widget.js?{VERHASH}"></script>
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.iframe-transport.js?{VERHASH}"></script>
+<!-- The basic File Upload plugin -->
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.fileupload.js?{VERHASH}"></script>
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.fileupload-process.js?{VERHASH}"></script>
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.fileupload-validate.js?{VERHASH}"></script>
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script>

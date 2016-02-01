@@ -1,0 +1,97 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/corpus/images/recycle.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="admin/scripts/admin.js"></script>
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script> 
+<style>
+html,body{
+	overflow:hidden;
+}
+.bs-main-container{
+	overflow:auto;
+}
+</style>
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0"> 
+  <!--{template corpus_list_top}--> 
+</nav>
+
+<div class="bs-container clearfix">
+<div class="bs-main-container">
+	<div class="main-header2 clearfix" style="padding:5px;" >
+     <ul class="nav nav-pills " >
+     	<li class="pull-left">
+        	<a style="padding:4px 10px;" href="{BASESCRIPT}?mod=corpus&op=list&do=recycle&operation=empty&cid=$cid" onclick="if(confirm('确定要清空回收站（无法恢复）？')){return true}else{return false}">清空回收站</a>
+        </li>
+         <li class="pull-right">
+         <form name="search" action="{BASESCRIPT}" method="get">
+                <input type="hidden" name="mod" value="corpus" />
+                <input type="hidden" name="op" value="list" />
+                <input type="hidden" name="do" value="recycle" />
+                <input type="hidden" name="cid" value="$cid" />
+                <div class="input-group" style="width:180px;">
+                     <input name="keyword"  type="text" value="$keyword" class="form-control input-sm"  placeholder="文档或目录名称">
+                     <a href="javascript:;" class="input-group-addon" onclick="this.parentNode.parentNode.submit();return false;"><i class="glyphicon glyphicon-search"></i></a>
+                 </div>
+          </form>
+         </li>
+     </ul>
+    </div>
+    <div class="main-content clearfix" >
+      <form id="appform" name="appform" class="form-horizontal" action="{BASESCRIPT}?mod=corpus&op=list&do=recycle&cid=$cid" method="post" onsubmit="return validate(this);">
+        <input type="hidden" name="recyclesubmit" value="true" />
+        <input type="hidden" name="refer" value="$refer" />
+        <input type="hidden" name="formhash" value="{FORMHASH}" />
+       <table class="table table-hover">
+                <thead>
+                  <th>&nbsp;</th>
+                  <th>名称</th>
+                  <th>删除时间</th>
+                  <th>删除人</th>
+                  <th>操作</th>
+                </thead>
+             <!--{loop $list $value}-->
+                <tr>
+                  <td width="40"><input type="checkbox" name="del[]" value="$value[fid]" <!--{if $value[system]}-->disabled<!--{/if}--> /></td>
+                  <td><!--{if $value[type]=='file'}--><i class="glyphicon glyphicon-file"></i><!--{else}--><i class="glyphicon glyphicon-book"></i><!--{/if}-->&nbsp;$value[fname]</td>
+                  <td>{eval echo dgmdate($value[deletetime],'u');}</td>
+                  <td><a href="user.php?uid=$value[deleteuid]" target="_blank">$value[deleteusername]</td>
+                 
+                  <td >  
+                  	<a class="" href="{BASESCRIPT}?mod=corpus&op=list&do=recycle&operation=delete&cid=$cid&fid=$value[fid]&refer=$refer"  title="彻底删除" onclick="if(confirm('确定要彻底删除（无法恢复）此文档？')){return true}else{return false}">彻底删除</a>&nbsp;&nbsp;
+                  	<a class="" href="{BASESCRIPT}?mod=corpus&op=list&do=recycle&operation=restore&cid=$cid&fid=$value[fid]&refer=$refer" title="恢复" onclick="if(confirm('确定要恢复此文档？')){return true}else{return false}">恢复</a>
+                  </td>
+                </tr>
+             <!--{/loop}-->
+             <thead>
+             <tr>
+                  <td colspan="20"><label for="chkall" class="checkbox-inline"><input type="checkbox" name="chkall" id="chkall"  onclick="checkAll('prefix', this.form, 'del')">&nbsp;删？</label>&nbsp;&nbsp;
+                 <input type="submit" class="btn btn-primary" value="彻底删除" />
+                 $multi
+                 </td>
+             </tr>
+             </thead>
+            </table>
+          </form>
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout(); 
+function validate(form){
+	if(confirm('确定要彻底删除所选的文档（无法恢复）？')){
+		return true;
+	}else{
+		return false;
+	}
+}
+jQuery(document).scroll(function(e) {
+	var clientHeight = Math.max(document.documentElement.clientHeight, document.body.clientHeight);
+	var scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    if(jQuery(document).scrollTop()+clientHeight>scrollHeight-20) jQuery('#btn-load-more').trigger('click');
+});
+
+
+</script> 
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script> 
+<!--{template common/footer_simple}--> 

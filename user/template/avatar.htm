@@ -1,0 +1,40 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<script src="user/scripts/register.js?{VERHASH}"></script>
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script>
+<!--{template common/header_simple_end}-->
+<div class="bs-container clearfix">
+<div class="bs-left-container  clearfix"> 
+  <!--{template left}--> 
+</div>
+<div class="left-drager">
+  <div class="left-drager-op">
+    <div class="left-drager-sub"></div>
+  </div>
+</div>
+<div class="bs-main-container  clearfix" >
+<div class="main-content" style="padding:20px;">
+		<script type="text/javascript">
+			function updateavatar() {
+				window.location.href = document.location.href.replace('&reload=1', '') + '&reload=1';
+			}
+			
+		</script>
+		<form method="post" autocomplete="off" action="user.php">
+			<span id="retpre" class="y xi2"></span>
+			<h4>{lang current_my_space}</h4>
+			<p>{lang setting_avatar_message}</p>
+            <p> <img src="avatar.php?uid=$_G[uid]&size=big&t={TIMESTAMP}" /></p>
+			<p>&nbsp;</p>	
+            <h4>{lang setting_my_new_avatar}</h4>
+            <p>{lang setting_my_new_avatar_message}</p>
+			<script type="text/javascript">document.write(AC_FL_RunContent('<!--{echo implode("','", $uc_avatarflash);}-->'));</script>
+			<input type="hidden" name="formhash" value="{FORMHASH}" />
+		</form>
+	</div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout();
+</script>
+<!--{template common/footer_simple}-->
+			

@@ -1,0 +1,458 @@
+<div class="classtree-topbar">
+     <!--{if $corpus[perm]>1}--><a class="newdir" href="javascript:;" onclick="jstree_create_dir(true);return false;" title="新建目录（同级）"></a>
+     <a class="newdir_1" href="javascript:;" onclick="jstree_create_dir();return false;" title="新建目录（下级）"></a>
+     <a class="newdoc" href="javascript:;" onclick="jstree_create_doc();return false;" title="新建文档"></a>
+     <a class="import needindzz" href="javascript:;" onclick="jstree_import_doc();return false;" title="导入文档"></a><!--{/if}-->
+     <a  class="search" href="javascript:;" onclick="jQuery('.classtree-search').slideDown(300);jQuery('#jstree_search_input').focus();" title="搜索" ></a>
+</div>
+<div  class="classtree-search">
+    <a href="javascript:;" class="search" onclick="jstree_search();return false" title="搜索"><i class="glyphicon glyphicon-search"></i></a>
+    <a href="javascript:;" class="delete" onclick="jstree_search('stop');return false" title="关闭搜索框"><i class="glyphicon glyphicon-remove"></i></a>
+    <input id="jstree_search_input" type="text" class="form-control" onkeyup="if(event.keyCode==13){jstree_search()}" onblur="jstree_search()" />
+</div>
+<div class="tree-wraper">
+	<div id="classtree" class="classtree-container" style="padding:5px 0" ></div>
+</div>
+<script type="text/javascript">
+var version='$version';
+var cid='{$cid}';
+var fid=parseInt('{$fid}');
+var perm='{$corpus[perm]}';
+var archive='{$corpus[archivetime]}';
+
+jQuery(document).ready(function(e) {
+	if(perm<2 || archive>0){
+		jQuery("#classtree").jstree({ 
+			"core" : {
+				"multiple" : false,
+				"check_callback" : true,
+				"themes" : { "responsive":false},
+				'data':function(node,cb){
+					var self=this;
+					jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&cid={$cid}',{'id':node.id,'t':new Date().getTime()},function(json){
+						cb.call(this,json);
+					});
+				}
+			  },
+			  "search":{  "show_only_matches":true,"fuzzy":false},
+			  "types" : {
+					"#" : {
+					  "max_children" : -1, 
+					  "max_depth" : -1, 
+					  "valid_children" : -1
+					},
+					"folder" : {
+					  "icon" : "jstree-icon-book",
+					  "valid_children" : ['folder','file']
+					},
+					"default" : {
+					  "valid_children" : []
+					},
+					"file" : {
+					  "icon" : "glyphicon jstree-icon-file",
+					  "valid_children" : []
+					}
+			  },
+			  "plugins" : ["types","search"]
+		});
+	}else{
+		jQuery("#classtree").jstree({ 
+		"core" : {
+			"multiple" : false,
+			"check_callback" : true,
+			"themes" : {"responsive" : false},
+			'data':function(node,cb){
+				var self=this;
+				jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&cid={$cid}',{'id':node.id,'t':new Date().getTime()},function(json){
+					cb.call(this,json);
+				});
+			}
+		  },
+		  "dnd":{
+			 "copy":false,
+			 "is_draggable":function(node){
+				 return true;
+			 }
+		  },
+		  
+		  "types" : {
+				"#" : {
+				  "max_children" : -1, 
+				  "max_depth" : -1, 
+				  "valid_children" : -1
+				},
+				"folder" : {
+				  "icon" : "jstree-icon-book",
+				  "valid_children" : ['folder','file']
+				},
+				"default" : {
+				  "valid_children" : []
+				},
+				"file" : {
+				  "icon" : "jstree-icon-file",
+				  "valid_children" : []
+				}
+		  },
+		  'contextmenu':{
+			  'select_node' : false,
+			  'show_at_node' : true,
+			  'items':{
+				  "create_sibing" : {
+						"separator_before"	: false,
+						"separator_after"	: true,
+						"_disabled"			: false, //(this.check("create_node", data.reference, {}, "last")),
+						"label"				: "新建目录(同级)",
+						"icon"				: "glyphicon glyphicon-tag",
+						"action"			: function (data) {
+							var inst = jQuery.jstree.reference(data.reference),
+							obj = inst.get_node(data.reference);
+							obj1=inst.get_node(obj.parent);
+							jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=create&cid={$cid}',{'pfid':obj.parent,'type':'folder','t':new Date().getTime()},function(json){
+								if(!json || json.error){
+									alert(json.error);
+								}else if(json.id>0){
+									inst.create_node(obj1, json, "last", function (new_node) {
+										setTimeout(function () { inst.edit(new_node); },0);
+									});
+								}
+							});
+						}
+					},
+					
+				  "create" : {
+						"separator_before"	: false,
+						"separator_after"	: true,
+						"_disabled"			: false, //(this.check("create_node", data.reference, {}, "last")),
+						"label"				: "新建目录(下级)",
+						"icon"				: "glyphicon glyphicon-tags",
+						"action"			: function (data) {
+							var inst = jQuery.jstree.reference(data.reference),
+								obj = inst.get_node(data.reference);
+								if(obj.type=='folder'){
+									jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=create&cid={$cid}',{'pfid':obj.id,'type':'folder','t':new Date().getTime()},function(json){
+										if(!json || json.error){
+											alert(json.error);
+										}else if(json.id>0){
+											inst.create_node(obj, json, "last", function (new_node) {
+												setTimeout(function () { inst.edit(new_node); },0);
+											});
+										}
+									});
+								}else{
+									alert('非目录下无法创建目录');
+								}
+						}
+					},
+					"create_file" : {
+						"separator_before"	: false,
+						"separator_after"	: true,
+						"_disabled"			: false, //(this.check("create_node", data.reference, {}, "last")),
+						"label"				: "新建文档",
+						"icon"				: "glyphicon glyphicon-file",
+						"action"			: function (data) {
+							var inst = jQuery.jstree.reference(data.reference),
+							obj = inst.get_node(data.reference);
+							if(obj.type=='folder'){
+								var pfid=obj.id
+							}else{
+								var pfid=obj.parent;
+								obj=jQuery("#classtree").jstree(true).get_node(obj.parent);
+							}
+							jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=create&cid={$cid}',{'pfid':pfid,'type':'file','t':new Date().getTime()},function(json){
+								if(!json || json.error){
+									alert(json.error);
+								}else if(json.id>0){
+									jQuery("#classtree").jstree(true).create_node(obj, json, "last", function (new_node) {
+										setTimeout(function () {
+											inst.edit(new_node);
+										});
+									});
+								}
+							});
+						}
+					},
+					"rename" : {
+						"separator_before"	: false,
+						"separator_after"	: false,
+						"_disabled"			: false, //(this.check("rename_node", data.reference, this.get_parent(data.reference), "")),
+						"label"				: "重命名",
+						/*
+						"shortcut"			: 113,
+						"shortcut_label"	: 'F2',*/
+						"icon"				: "glyphicon glyphicon-leaf",
+						
+						"action"			: function (data) {
+							
+							var inst = jQuery.jstree.reference(data.reference),
+								obj = inst.get_node(data.reference);
+								inst.edit(obj);
+									
+						}
+					},
+					"remove" : {
+						"separator_before"	: false,
+						"icon"				: false,
+						"separator_after"	: false,
+						"_disabled"			: false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+						"label"				: "删除",
+						"icon"				: "glyphicon glyphicon-remove",
+						"action"			: function (data) {
+							var inst = jQuery.jstree.reference(data.reference),
+								obj = inst.get_node(data.reference);
+								if(obj.parent!='#' || (obj.parent=='#' && (inst.get_prev_dom(obj,true) || inst.get_next_dom(obj,true)))) {
+									if(inst.is_selected(obj)) {
+										inst.delete_node(inst.get_selected());
+									}
+									else {
+										inst.delete_node(obj);
+									}
+								}else showmessage('必须保留最后一个节点','danger',3000,1);
+						}
+					}
+			  }
+		  },
+		   "search":{  "show_only_matches":true,"fuzzy":false},
+		  "plugins" : ["contextmenu", "dnd", "types","search"]
+		// List of active plugins
+		
+		});
+	}
+	
+	jQuery("#classtree").on('select_node.jstree',function(e,data){
+		jQuery("#classtree").jstree(true).toggle_node(data.node);
+		if(data.node.type=='file'){
+			if(jQuery('#'+data.node.id).hasClass('isnew')){
+				editTopic(data.node.id);
+			}else{
+				getTopicListByFid(data.node.id);
+			}
+			location.hash='#fid_'+data.node.id;
+		}
+	 });
+	 jQuery("#classtree").on('ready.jstree',function(e){
+		 var hash=location.hash;
+		 if(hash){
+		 	fid=parseInt(hash.replace('#fid_',''));
+		 }
+		 if(fid>0 && jQuery("#classtree").jstree(true).get_node(fid)){
+			var node=jQuery("#classtree").jstree(true).get_node(fid);
+		 }else{
+		   var node=jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'));
+		 }
+		 jQuery("#classtree").jstree(true).select_node(node);
+		 jQuery("#classtree .jstree-anchor").addTouch();
+	 });
+	 jQuery("#classtree").on('move_node.jstree',function(e,data){
+		jQuery.get(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=move&cid={$cid}',{'fid':data.node.id,'pfid':data.parent,'position':data.position,'t':new Date().getTime()});
+	 });
+	 jQuery("#classtree").on('open_node.jstree',function(e,data){
+		 jQuery("#"+data.node.id+" .jstree-anchor").addTouch();
+	 });
+	jQuery("#classtree").on('rename_node.jstree',function(e,data){
+		jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=rename&cid={$cid}',{'fid':data.node.id,text:data.text,'t':new Date().getTime()},function(json){
+			var inst = jQuery("#classtree").jstree(true);
+			var obj = inst.get_node(data.node);
+			if(!json || json.error){
+					obj.text=data.old;
+					inst.set_text(obj,data.old);
+				if(json.error) alert(json.error);	
+			}else{
+				if(inst.is_selected(data.node) && data.node.type=='file'){
+					jQuery('#subject').val(data.text);
+					jQuery('.document-subject .subject').html(data.text);
+				}
+			}
+		});
+	 });
+	 jQuery("#classtree").on('create_node.jstree',function(e,data){
+	 });
+	 jQuery("#classtree").on('delete_node.jstree',function(e,data){
+		var inst = jQuery("#classtree").jstree(true);
+		if (inst.is_selected(data.node)){
+			jQuery('#topic_container').empty();
+			if(inst.get_node(inst.get_next_dom(data.node))){
+				inst.select_node(inst.get_node(inst.get_next_dom(data.node)));
+			}else if(inst.get_parent(data.node)=='#'){
+				inst.select_node(inst.get_node(jQuery('#classtree .jstree-node:first').attr('id')));
+			}else{
+				inst.select_node(inst.get_node(inst.get_parent(data.node)));
+			}
+		}
+		jQuery.get(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=delete&cid={$cid}',{'fid':data.node.id,'t':new Date().getTime()},function(){});
+		
+	 });
+});
+function jstree_search(op){
+	if(op=='stop' || jQuery('#jstree_search_input').val()==''){
+		jQuery('.classtree-search').slideUp(500);
+		jQuery('#jstree_search_input').val('');
+		jQuery("#classtree").jstree(true).search();
+	}else{
+	 jQuery("#classtree").jstree(true).search(jQuery('#jstree_search_input').val());
+	}
+}
+
+function jstree_create_dir(flag){
+	var obj;
+	if(jQuery("#classtree").jstree(true).get_selected(true).length>0){
+		obj=jQuery("#classtree").jstree(true).get_selected(true);
+		obj=obj[0];
+	}else if(jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'))){
+		obj=jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'));
+	}else{
+		return false;
+	}
+	if(flag){//同级
+		obj1=jQuery("#classtree").jstree(true).get_node(obj.parent);
+		jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=create&cid={$cid}',{'pfid':obj.parent,'type':'folder','t':new Date().getTime()},function(json){
+			if(!json || json.error){
+				alert(json.error);
+			}else if(json.id>0){
+				jQuery("#classtree").jstree(true).create_node(obj1, json, "last", function (new_node) {
+					setTimeout(function () { jQuery("#classtree").jstree(true).edit(new_node); },0);
+				});
+			}
+		});
+	}else{//下级
+		if(obj.type=='folder'){
+			jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=create&cid={$cid}',{'pfid':obj.id,'type':'folder','t':new Date().getTime()},function(json){
+				if(!json || json.error){
+					alert(json.error);
+				}else if(json.id>0){
+					jQuery("#classtree").jstree(true).create_node(obj, json, "last", function (new_node) {
+						setTimeout(function () { jQuery("#classtree").jstree(true).edit(new_node); },0);
+					});
+				}
+			});
+		}else{
+			alert('非目录下无法创建目录');
+		}
+	}
+}
+function jstree_import_doc(){
+	
+	top.OpenFile('open','打开文件',{'document':['文本文档',['DZZDOC','HTM','HTML','SHTM','SHTML','HTA','HTC','XHTML','STM','SSI','JS','JSON','AS','ASC','ASR','XML','XSL','XSD','DTD','XSLT','RSS','RDF','LBI','DWT','ASP','ASA','ASPX','ASCX','ASMX','CONFIG','CS','CSS','CFM','CFML','CFC','TLD','TXT','PHP','PHP3','PHP4','PHP5','PHP-DIST','PHTML','JSP','WML','TPL','LASSO','JSF','VB','VBS','VTM','VTML','INC','SQL','JAVA','EDML','MASTER','INFO','INSTALL','THEME','CONFIG','MODULE','PROFILE','ENGINE'],'']},{bz:'',multiple:true},function(data){//只打开本地盘
+		var datas=[];
+		if(data.params.multiple){
+			datas=data.icodata
+		}else{
+			datas=[data.icodata];
+		}
+		if(jQuery("#classtree").jstree(true).get_selected(true).length>0){
+			obj=jQuery("#classtree").jstree(true).get_selected(true);
+			obj=obj[0];
+		}else if(jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'))){
+			obj=jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'));
+		}else{
+			return false;
+		}
+		var pfid=obj.parent;
+		obj=jQuery("#classtree").jstree(true).get_node(obj.parent);
+		for(var i in datas){
+			var data={'pfid':pfid,'type':'file','name':datas[i].name,'aid':datas[i].aid};
+			if(datas[i].type=='dzzdoc'){
+				data.did=datas[i].did;
+			}else if(datas[i].aid>0){
+				data.aid=datas[i].aid;
+			}else{
+				continue;
+			}
+			jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=import&cid={$cid}',data,function(json){
+				if(!json || json.error){
+					showmessage(json.error);
+				}else if(json.id>0){
+					jQuery("#classtree").jstree(true).create_node(obj, json, "last", function (new_node) {
+						/*setTimeout(function () {
+							
+							jQuery("#classtree").jstree(true).deselect_all(true);
+							jQuery("#classtree").jstree(true).select_node(jQuery("#classtree").jstree(true).get_node(new_node.id));
+						});*/
+					});
+				}
+			});
+			
+		}
+		
+	});
+	
+}
+function jstree_create_doc(){
+	if(jQuery("#classtree").jstree(true).get_selected(true).length>0){
+		obj=jQuery("#classtree").jstree(true).get_selected(true);
+		obj=obj[0];
+	}else if(jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'))){
+		obj=jQuery("#classtree").jstree(true).get_node(jQuery('#classtree .jstree-node:first').attr('id'));
+	}else{
+		return false;
+	}
+
+	if(obj.type=='folder'){
+		var pfid=obj.id
+	}else{
+		var pfid=obj.parent;
+		obj=jQuery("#classtree").jstree(true).get_node(obj.parent);
+	}
+	jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=create&cid={$cid}',{'pfid':pfid,'type':'file','t':new Date().getTime()},function(json){
+		if(!json || json.error){
+			alert(json.error);
+		}else if(json.id>0){
+			jQuery("#classtree").jstree(true).create_node(obj, json, "last", function (new_node) {
+				setTimeout(function () {
+					jQuery("#classtree").jstree(true).edit(new_node);
+					/*jQuery('#'+new_node.id).addClass('isnew');
+					jQuery("#classtree").jstree(true).deselect_all(true);
+					jQuery("#classtree").jstree(true).select_node(jQuery("#classtree").jstree(true).get_node(new_node.id));*/
+				});
+			});
+		}
+	});
+}
+function editTopic(fid){
+	try{ jQuery('editor1').remove();needsave=0;api.win.needsave=0;api.setFileExt([]);window.onbeforeunload=null}catch(e){};
+	jQuery('#topic_container').load(DZZSCRIPT+'?mod=corpus&op=list&do=newdoc&cid={$cid}&fid='+fid+'&t='+new Date().getTime(),function(){
+		jQuery(document).scrollTop(0);
+	});
+}
+function deleteTopicVersion(fid,ver){
+	jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=deleteVersion&cid={$cid}',{'fid':fid,'ver':ver,t:new Date().getTime()},function(json){
+		if(!json || json.error){
+			alert(json.error);
+		}else if(json.msg=='success'){
+			getTopicListByFid(fid,json.ver);
+		}
+	});
+}
+function applyTopicVersion(fid,ver){
+	jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=ctree&operation=applyVersion&cid={$cid}',{'fid':fid,'ver':ver,t:new Date().getTime()},function(json){
+		if(!json || json.error){
+			alert(json.error);
+		}else if(json.msg=='success'){
+			getTopicListByFid(fid,json.ver);
+		}
+	});
+}
+function deleteTopic(fid){
+	var inst = jQuery("#classtree").jstree(true);
+	var obj=inst.get_node(fid);
+	if(obj.parent!='#' || (obj.parent=='#' && (inst.get_prev_dom(obj,true) || inst.get_next_dom(obj,true)))) {
+		jQuery("#classtree").jstree(true).delete_node(jQuery("#classtree").jstree(true).get_node(fid));
+	}else{
+		showmessage('必须保留最后一个节点','danger',3000,1);
+	}
+}
+function getTopicListByFid(fid,ver){
+	jQuery('#loading_info').show();
+	try{ needsave=0;api.win.needsave=0;api.setFileExt([]);jQuery('#editor1').remove();window.onbeforeunload=null}catch(e){};
+	jQuery('#topic_container').load(DZZSCRIPT+'?mod=corpus&op=list&do=view&cid={$cid}&fid='+fid+'&ver='+ver+'&t='+new Date().getTime(),function(){
+		jQuery('.bs-main-container').scrollTop(0);
+		jQuery('#loading_info').hide();
+	});
+		
+	
+}
+jQuery(document).ready(function(e) {
+	
+   try{if(!top._config) jQuery('.needindzz').hide(); }catch(e){}
+});
+
+</script>

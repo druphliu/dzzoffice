@@ -1,0 +1,220 @@
+
+.bs-main-container{
+	margin-left:0;
+}
+.corpus-item{
+	position:relative;width:188px;height:235px;margin:15px;display:block;
+	/*_filter: Alpha(opacity=90);
+  	opacity: 0.9;*/
+}
+/*.corpus-item:hover{
+	_filter: Alpha(opacity=100);
+  	opacity: 1;
+}*/
+.corpus-item span{
+	display:block;
+}
+ .corpus-item .corpus-item-back{
+	position:absolute;z-index:0;left:12px;top:5px;width:171px;height:225px;overflow:hidden;
+}
+ .corpus-item .corpus-item-back img{
+	width:171px;height:225px;
+}
+.corpus-item .corpus-item-upper,.corpus-item-next .corpus-item-upper{
+	width:100%;
+	height:100%;
+	background:url(back_c.png) 50% 50% no-repeat;
+	background-attachment:scroll;
+	position:absolute;
+	z-index:1;
+}
+.corpus-item-next{
+	position:relative;width:188px;height:235px;margin:15px;display:block;
+}
+.corpus-item-next .corpus-item-upper{
+	width:100%;
+	height:100%;
+	background:#F7F7F7
+}
+.corpus-item-title{
+	padding:30px 15px 20px 20px;
+	color:#FFF;
+	font-size:14px;
+	font-weight:bold;
+	font-family:Tahoma,'微软雅黑','Simsun'; 
+	word-break:break-all;
+	text-shadow: 1px 1px 1px #000,0px 0px 1px #000,0px 0px 1px #000,0px 0px 1px #000;
+	text-align:center;
+}
+
+.corpus-item .corpus-item-operation{
+	position:absolute;
+	padding:10px;
+	bottom:0px;
+	left:10px;
+	display:none;
+}
+.hover .corpus-item-operation{
+	display:block;
+}
+.corpus-item .corpus-item-guide{
+	position:absolute;
+	top:3px;
+	right:3px;
+	width:48px;
+	height:48px;
+}
+.corpus-item .corpus-item-guide.private{
+	background:url(private.png) no-repeat;
+}
+.corpus-item .corpus-item-guide.forceindex{
+	background:url(forceindex.png) no-repeat;
+}
+.corpus-create{
+	display:block;
+}
+.corpus-create .corpus-item-title{
+	text-shadow: none;
+	font-size:18px;
+	color:#428bca;
+	
+}
+.corpus-item-create{
+	position:absolute;
+	bottom:67px;
+	left:63px;
+	width:67px;
+	height:67px;
+	background:url(create.png) no-repeat;
+}
+.cover-item{
+	width:171px;height:225px;position:relative;
+}
+.cover-item img{
+	width:171px;height:225px;
+}
+
+.cover-op{
+	padding:0 42px;position:relative;
+}
+.cover-op-prev{
+	position:absolute;
+	left:0;
+	top:0;
+	width:42px;
+	height:235px;
+	background:url(pre.gif) 0 50% no-repeat;
+}
+.cover-op-next{
+	position:absolute;
+	right:0;
+	top:0;
+	width:42px;
+	height:235px;
+	background:url(next.gif) 0 50% no-repeat;
+}
+.cover-container{
+	position:relative;left:0px;top:0;width:171px;height:225px;overflow:hidden;
+	
+}
+.cover-ul{
+	width:171px;height:225px;position:absolute;z-index:-1
+}
+
+
+
+.jstree-root{
+	padding:5px 0 0 10px;
+	line-height:24px;
+}
+.classtree-topbar{
+	position:relative;
+	bottom:0px;
+	left:0px;
+	background:#F7F7F7;
+	border-bottom:1px solid #D2D2D2;
+	border-top:1px solid #FFF;
+	padding:0px 10px 0;
+}
+.classtree-container,usertree-container{
+	border-top:1px solid #FFF;
+}
+.classtree-topbar a{
+	display:inline-block;
+	margin:5px 2px 0;
+	width:24px;
+	height:24px;
+	background-image:url(icons.png);
+    _filter: Alpha(opacity=70);
+    opacity: 0.7;
+}
+.classtree-topbar .newdir{
+	background-position:0 -72px;
+}
+.classtree-topbar .newdir_1{
+	background-position:0 -96px;
+}
+.classtree-topbar .newdoc{
+	background-position:0 -120px;
+}
+.classtree-topbar .import{
+	background-position:0 -144px;
+}
+.classtree-topbar .search{
+	background-position:0 -168px;
+}
+
+.classtree-topbar a:hover{
+	 _filter: Alpha(opacity=100);
+  opacity: 1;
+}
+.classtree-topbar a:active{
+
+}
+
+.classtree-search{
+	position:absolute;
+	left:1px;
+	top:2px;
+	right:1px;
+	
+	display:none;
+}
+.classtree-search .form-control{
+	padding:5px 40px 5px 5px;
+}
+.classtree-search .form-control:focus{
+	box-shadow:none;
+}
+.classtree-search .search{
+	position:absolute;
+	right:25px;
+	top:8px;
+}
+.classtree-search .delete {
+	position: absolute;
+	right: 4px;
+	top: 8px;
+}
+
+/*重定义图标*/
+.jstree-default a i{
+  _filter: Alpha(opacity=100);
+  opacity: 1;
+}
+.jstree-default .jstree-anchor>.jstree-themeicon {
+	background-image:url(icons.png);
+}
+ .jstree-open .jstree-anchor>.jstree-icon-book{
+	background-position:0 -24px;
+}
+ .jstree-closed .jstree-anchor>.jstree-icon-book{
+	background-position:0 0;
+}
+
+.jstree-leaf .jstree-anchor>.jstree-icon-book{
+	background-position:0 0;
+}
+.jstree-node .jstree-anchor>.jstree-icon-file{
+	background-position:0 -48px;
+}

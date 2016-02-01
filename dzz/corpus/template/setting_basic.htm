@@ -1,0 +1,91 @@
+<style>
+.user-item .delete{
+	display:none;
+}
+.user-item.hover .delete{
+	display:block;
+}
+.more{
+	font-size:80px;line-height:20px;font-family: georgia;
+	color:#BBBBBB;
+}
+.more:hover{
+	color:#428bca;
+}
+.btn-sorg {
+	margin: 5px;
+}
+</style>
+<script type="text/javascript" src="dzz/system/scripts/selorg.js?{VERHASH}"></script>
+<script type="text/javascript">
+selorg.openarr=$openarr;
+</script>
+<div class="setting-basic-container" style="padding:15px;">
+  <form id="corpusform" name="corpusform" class="form-horizontal-left form-horizontal" action="{BASESCRIPT}?mod=corpus&op=setting&do=basic" method="post" >
+    <input type="hidden" name="settingsubmit" value="true" />
+    <input type="hidden" name="formhash" value="{FORMHASH}" />
+     <dl>
+    	<dt>每个用户新建文集最大个数</dt>
+        <dd class="clearfix">
+        	<input type="text" class="form-control input-sm" name="settingnew[maxcorpus]" value="$setting[maxcorpus]" />
+            <span class="help-inline">留空或0为不限制</span>
+        </dd>
+    </dl>
+    
+    <dl>
+    	<dt>允许建立文集的用户</dt>
+        <dd class="clearfix">
+        	<label class="radio-inline "><input type="radio" name="settingnew[allownewcorpus]" value="0"<!--{if !$setting['allownewcorpus']}-->checked<!--{/if}--> onclick="jQuery('#allownewnewcorpus_users').hide()">全站用户</label>
+        </dd>
+         <dd class="clearfix">
+            <label class="radio radio-inline"><input type="radio"  name="settingnew[allownewcorpus]" value="1"<!--{if $setting['allownewcorpus']>0}-->checked<!--{/if}--> onclick="jQuery('#allownewnewcorpus_users').show()">指定用户</label>
+        </dd>
+        
+        <dd class="clearfix">
+        <dl id="allownewnewcorpus_users" class="mt20" <!--{if $setting[allownewcorpus]==0}-->style="display:none"<!--{/if}-->>
+          <dt><div class="dropdown">
+                  <input id="sel_muids" name="settingnew[moderators]" type="hidden" value="$setting[moderators]" />
+                  <a href="javascript:;" class="dropdown-toggle btn btn-width btn-default" id="muids_Menu" data-toggle="dropdown">选择允许创建文集的用户<span class="caret"></span></a>
+                  <div id="muids_dropdown_menu" class="dropdown-menu org-sel-box" role="menu" aria-labelledby="muids_Menu">
+                       <iframe name="muids_iframe" class="org-sel-box-iframe" src="{DZZSCRIPT}?mod=system&op=orgtree&ctrlid=muids&multiple=1" frameborder="0" marginheight="0" marginwidth="0" width="100%" height="100%" allowtransparency="true" ></iframe>
+                  </div>
+             </div>
+           </dt>
+          <dd class="clearfix " >
+            <div id="muids"> 
+                <!--{loop $sel_org $value}-->
+                <button id="muids_sl_$value[orgid]" type="button" class="btn btn-simple btn-sorg" data-val="$value['orgid']">
+                <!--{if $value['forgid']}--> 
+                <img src="dzz/system/images/department.png" /> 
+                <!--{else}--> 
+                <img src="dzz/system/images/organization.png" /> 
+                <!--{/if}--> 
+                $value[orgpath] <a href="javascript:;" class="ibtn glyphicon glyphicon-remove" style="width:20px !important;height:20px;line-height:20px;margin-top:-3px;margin-right:-10px;" title="删除" onclick="selorg.remove('muids',this);"></a>
+                </button>
+                <!--{/loop}--> 
+                <!--{loop $sel_user $value1}-->
+                <button id="muids_sl_uid_$value1[uid]" data-val="uid_$value1['uid']" type="button" class="btn btn-simple btn-sorg">
+                <img src="dzz/system/images/user.png" /> $value1[username] <a href="javascript:;" class="ibtn glyphicon glyphicon-remove" style="width:20px !important;height:20px;line-height:20px;margin-top:-3px;margin-right:-10px;" title="删除" onclick="selorg.remove('muids',this);"></a>
+                </button>
+                <!--{/loop}--> 
+            </div>
+          </dd>
+        </dl>
+        </dd>
+    </dl>
+    <dl>
+    	<dt>归档文集查看权限</dt>
+        <dd class="clearfix">
+        	<label class="radio-inline "><input type="radio" name="archiveview" value="0"<!--{if !$setting[archiveview]}-->checked<!--{/if}-->>允许普通成员查看归档文集</label>
+        </dd>
+        <dd class="clearfix">
+            <label class="radio radio-inline"><input type="radio"  name="archiveview" value="1"<!--{if $setting[archiveview]=='1'}-->checked<!--{/if}-->>允许普通成员查看参与过的归档文集</label>
+        </dd>
+        <dd class="clearfix">
+            <label class="radio radio-inline"><input type="radio"  name="archiveview" value="2"<!--{if $setting[archiveview]=='2'}-->checked<!--{/if}-->>不允许普通成员查看归档文集</label>
+        </dd>
+    </dl>
+    <input class="btn btn-primary"  name="settingsubmit_btn" value="保存更改" type="submit" >
+  </form>
+</div>
+

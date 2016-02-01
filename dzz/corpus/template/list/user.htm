@@ -1,0 +1,180 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script> 
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0"> 
+  <!--{template corpus_list_top}--> 
+</nav>
+<style>
+html,body{
+	overflow:hidden;
+}
+h4{
+	font-weight:bold;
+}
+.color_4{
+	color:#f0ad4e;
+	text-shadow:0px 1px 1px #CCC;
+}
+.color_3{
+	color:#3276b1;
+}
+.user-item .delete{
+	display:none;
+}
+.user-item.hover .delete{
+	display:block;
+}
+.user-item .dropdown,.user-item .dropdown-menu{
+	font-size:12px;
+}
+.more{
+	font-size:80px;line-height:20px;font-family: georgia;
+	color:#BBBBBB;
+}
+.more:hover{
+	color:#428bca;
+}
+.bs-main-container{
+	overflow:auto;
+}
+/*.user-item.hover .dropdown{
+	display:block;
+}*/
+</style>
+<div class="bs-container clearfix">
+<div class="bs-main-container">
+  <div class="main-content clearfix" style="padding:15px;">
+    <div class="user_group_container">
+      <h4 style="padding:0 10px;" class="user_group_title">协作成员<small>(<i id="count_user_group_m">$userlist_count</i>)</small></h4>
+      <ul id="user_group_m" class="user_group_u user_group_m list-unstyled clearfix" >
+        <!--{if $corpus[perm]>2}-->
+        <li  class=" pull-left" style="padding:10px;width:110px">
+          <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <a href="{DZZSCRIPT}?mod=corpus&op=list&do=user&operation=selectuser&cid=$cid&type=2"><img style="margin:10px" src="dzz/corpus/images/create.png" width="66" height="66" /></a> </div>
+          <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span ><a href="{DZZSCRIPT}?mod=corpus&op=list&do=user&operation=selectuser&cid=$cid&type=2">添加协作成员</a></span> </p>
+        </li> 
+        <!--{/if}-->
+        <!--{loop $userlist $value}-->
+        <li id="user_{$value[uid]}" perm="$value[perm]" class="user-item pull-left" style="padding:10px;width:110px;position:relative"> <a href="javascrip:;" class="delete" onclick="deleteUser('{$value[uid]}');return false" style="position:absolute;top:0px;right:0px;"><i style="color:#d2322d;font-size:16px" class="glyphicon glyphicon-remove-sign"></i></a>
+          <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <img src="avatar.php?uid=$value[uid]&size=middle" width="85" height="85" /> </div>
+          <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span class="color_{$value[perm]}"> $value[username]</span> </p>
+          <!--{if $corpus[perm]>2}-->
+          <ul class="nav  list-unstyled">
+            <li class="dropdown text-center"> <a style="padding:5px;"  href="admin.php?mod=member&amp;orgid=0" data-toggle="dropdown" role="button" id="user-drop-{$value[uid]}" class="dropdown-toggle">$value[permtitle]<b class="caret"></b></a>
+              <ul aria-labelledby="user-drop-{$value[uid]}" role="menu" class="dropdown-menu" id="user-drop-{$value[uid]}-menu" style="min-width:90px;">
+                <!--{loop $permtitle $key $value1}-->
+                <li role="presentation"><a href="javascript:;" role="menuitem" uid="$value[uid]" perm="$key" onclick="setPerm(this)">$value1</a></li>
+                <!--{/loop}-->
+              </ul>
+            </li>
+          </ul>
+          <!--{/if}-->
+        </li>
+        <!--{/loop}-->
+        <!--{if $userlist_next}-->
+        	<li  class="userlist-next pull-left" style="padding:10px;width:110px">
+              <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;overflow:hidden;text-align:center;"> <a class="more" href="javascript:;" onclick="getNext('2','{$limit}');return false">...<p style="font-size:14px;line-height:35px">加载更多</p></a> </div>
+            </li>
+        <!--{/if}-->
+      </ul>
+      <h4 style="padding:0 10px;" class="user_group_title">关注成员<small>(<i id="count_user_group_f">$follows_count</i>)</small></h4>
+      <ul id="user_group_f" class="user_group_u user_group_f list-unstyled clearfix" >
+        <!--{if $corpus[perm]>2}-->
+         <li  class="pull-left" style="padding:10px;width:110px">
+          <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <a href="{DZZSCRIPT}?mod=corpus&op=list&do=user&operation=selectuser&cid=$cid&type=1"><img style="margin:10px" src="dzz/corpus/images/create.png" width="66" height="66" /> </a></div>
+          <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span ><a href="{DZZSCRIPT}?mod=corpus&op=list&do=user&operation=selectuser&cid=$cid&type=1">添加关注成员</a></span> </p>
+        </li>
+        <!--{/if}-->
+        <!--{loop $follows $value}-->
+        <li id="user_{$value[uid]}" perm="$value[perm]" class="user-item pull-left" style="padding:10px;width:110px;position:relative"> <a href="javascrip:;" class="delete" onclick="deleteUser('{$value[uid]}');return false;" style="position:absolute;top:0px;right:0px;"><i style="color:#d2322d;font-size:16px" class="glyphicon glyphicon-remove-sign"></i></a>
+          <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <img src="avatar.php?uid=$value[uid]&size=middle" width="85" height="85" /> </div>
+          <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span class="color_{$value[perm]}"> $value[username]</span> </p>
+          <!--{if $corpus[perm]>2}-->
+          <ul class="nav  list-unstyled">
+            <li class="dropdown text-center"> <a style="padding:5px;"  href="admin.php?mod=member&amp;orgid=0" data-toggle="dropdown" role="button" id="user-drop-{$value[uid]}" class="dropdown-toggle">$value[permtitle]<b class="caret"></b></a>
+              <ul aria-labelledby="user-drop-{$value[uid]}" role="menu" class="dropdown-menu" id="user-drop-{$value[uid]}-menu" style="min-width:90px;">
+                <!--{loop $permtitle $key $value1}-->
+                <li role="presentation"><a href="javascript:;" role="menuitem" uid="$value[uid]" perm="$key" onclick="setPerm(this)">$value1</a></li>
+                <!--{/loop}-->
+              </ul>
+            </li>
+          </ul>
+          <!--{/if}-->
+        </li>
+        <!--{/loop}-->
+         <!--{if $follows_next}-->
+        	<li  class="follow-next pull-left" style="padding:10px;width:110px">
+              <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;overflow:hidden;text-align:center;"> <a class="more"  href="javascript:;" onclick="getNext('1','{$limit}');return false">...<p style="font-size:14px;line-height:35px">加载更多</p></a> </div>
+            </li>
+        <!--{/if}-->
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout(); 
+var perm='{$corpus[perm]}';
+function getNext(type,start){
+	jQuery.get(DZZSCRIPT+'?mod=corpus&op=list&do=user&operation=getMore&cid={$cid}',{'type':type,'start':start,'t':new Date().getTime()},function(html){
+		if(type=='1'){
+			var li=jQuery('.follow-next');
+		}else{
+			var li=jQuery('.userlist-next');
+		}
+		li.replaceWith(html);
+	});
+}
+function deleteUser(uid){
+	jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=user&operation=deleteUser&cid={$cid}',{'uid':uid,'t':new Date().getTime()},function(json){
+		if(json.error){
+			showmessage(json.error,'danger',3000,1);
+		}else{
+			jQuery('#user_'+uid).remove();
+		}
+	});
+}
+function setPerm(obj){
+	var el=jQuery(obj);
+	var li =el.parent().parent().parent().parent().parent();
+	var uid=el.attr('uid');
+	var perm=parseInt(el.attr('perm'));
+	if(li.attr('perm')==perm) return;
+	jQuery('#user-drop-'+uid).html(el.html()+'<b class="caret"></b>');
+	jQuery.getJSON(DZZSCRIPT+'?mod=corpus&op=list&do=user&operation=changeUserPerm&cid={$cid}',{'uid':uid,perm:perm,'t':new Date().getTime()},function(json){
+		if(json.error){
+			showmessage(json.error,'danger',3000,1);
+		}else{
+			if(perm==1 && li.parent().attr('id')=='user_group_m'){
+				if(jQuery('.follow-next').size()>0){
+					jQuery('.follow-next').before(li);
+				}else{
+					li.appendTo(jQuery('#user_group_f'));
+				}
+			}
+			if(perm>1 && li.parent().attr('id')=='user_group_f'){
+				if(jQuery('.userlist-next').size()>0){
+					jQuery('.userlist-next').before(li);
+				}else{
+					li.appendTo(jQuery('#user_group_m'));
+				}
+			}
+			jQuery('#count_user_group_f').html(jQuery('#user_group_f').find('.user-item').size());
+			jQuery('#count_user_group_m').html(jQuery('#user_group_m').find('.user-item').size());
+		}
+	});
+}
+jQuery(document).ready(function(e) {
+	
+   if(perm>2){	
+	jQuery(document).on('mouseenter','.user-item',function(){
+		jQuery(this).addClass('hover');
+	});
+	jQuery(document).on('mouseleave','.user-item',function(){
+		jQuery(this).removeClass('hover');
+	});
+   }
+});
+</script> 
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script> 
+<!--{template common/footer_simple}--> 

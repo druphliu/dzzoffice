@@ -1,0 +1,84 @@
+
+<div id="archivetree" class="archivetree-container" style="padding:5px 0" >
+	<!--{if $tree}-->
+    	<ul>$tree</ul>
+    <!--{else}-->
+    	<span class="text-warning" style="padding:10px 10px 10px 20px;">还没有归档文集</span>
+    <!--{/if}-->
+</div>
+<script type="text/javascript">
+
+
+jQuery(document).ready(function(e) {
+	<!--{if $tree}-->
+		jQuery("#archivetree").jstree({ 
+			"core" : {
+				"multiple" : false,
+				"check_callback" : true,
+				"themes" : { 
+						     "responsive":false
+				}
+			  },
+			 
+			  "types" : {
+					"#" : {
+					  "max_children" : -1, 
+					  "max_depth" : -1, 
+					  "valid_children" : -1
+					},
+					
+					"default" : {
+					"icon" : "jstree-icon-book",
+					  "valid_children" : []
+					},
+					
+			  },
+			  "plugins" : [
+				 "types"
+			  ]
+		});
+	 
+	
+	jQuery("#archivetree").on('select_node.jstree',function(e,data){
+			getArchiveListByMonth(data.node.id);
+			location.hash='#mon_'+data.node.id;
+	 });
+	 jQuery("#archivetree").on('ready.jstree',function(e){
+		 var hash=location.hash;
+		 var month=hash.replace('#mon_','');	
+		 
+		 if(month!='' && jQuery("#archivetree").jstree(true).get_node(month)){
+			var node=jQuery("#archivetree").jstree(true).get_node(month);
+		 }else{
+		   var node=jQuery("#archivetree").jstree(true).get_node(jQuery('#archivetree .jstree-node:first').attr('id'));
+		 }
+		 jQuery("#archivetree").jstree(true).select_node(node);
+	 });
+	 <!--{/if}-->
+});
+function checkViewPerm(obj){
+	var el=jQuery(obj);
+	var archiveview=parseInt('{$archiveview}');
+	var userperm=el.data('userperm');
+	var perm=el.data('perm');
+	var msg='';
+	if(archiveview>1 && userperm<3){ //
+		msg='不允许普通成员查看归档文集';
+	}
+	if(archiveview==1 && userperm<1){ //
+		msg='只允许查看参与过的归档文集';
+	}
+	if(perm<1 && userperm<1){
+		msg='隐私的文集只有文集成员才能查看';
+	}
+	if(msg!==''){
+		showmessage(msg, 'error',1000,true);
+		return false;
+	}else return true;
+}
+function getArchiveListByMonth(month){
+	jQuery('#archive_container').load(DZZSCRIPT+'?mod=corpus&op=archive&do=list&month='+month,function(){
+		jQuery(document).scrollTop(0);
+	});
+}
+</script>

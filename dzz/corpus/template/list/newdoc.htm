@@ -1,0 +1,144 @@
+<link href="dzz/system/ueditor/themes/default/css/ueditor.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/system/ueditor/themes/default/css/ueditor_add.css?{VERHASH}" rel="stylesheet" media="all">
+<script src="dzz/system/ueditor/ueditor.config.js?{VERHASH}"></script>
+<script src="dzz/system/ueditor/ueditor.all.js?{VERHASH}"></script>
+<script src="dzz/system/ueditor/lang/zh-cn/zh-cn.js?{VERHASH}"></script>
+<script src="data/cache/smilies_var.js?{VERHASH}"></script>
+
+<script src="dzz/scripts/dzz.api.js?{VERHASH}"></script>
+<script type="text/javascript" >  
+var i=0;
+try{
+	var api=_api.init();
+	api.setFileExt(['image','document','attach','link','video','dzzdoc']);
+}catch(e){}
+</script>
+
+       <form id="ueditorform" name="ueditorform" class="form-horizontal" action="{BASESCRIPT}?mod=corpus&op=list&do=newdoc" method="post" onsubmit="validate(this);return false" >
+        <input type="hidden" name="edit" value="true" />
+        <input type="hidden" name="did" value="$did" />
+        <input type="hidden" name="fid" value="$fid" />
+        <input type="hidden" name="cid" value="$cid" />
+        <input id="autosave" type="hidden" name="autosave" value="0" />
+        <input id="reversion" type="hidden" name="newversion" value="0" />
+        <input type="hidden" name="handlekey" value="ueditorform" />
+        <input type="hidden" name="message" id="message" value="" />
+        <input type="hidden" name="formhash" value="{FORMHASH}" />
+       
+         <script type="text/plain" id="editor1" style="position:relative;height:250px;margin:0 auto">$str</script>
+          <p style="padding:10px" class="clearfix"><button type="button" id="ueditorform_btn_0" class="btn btn-primary" data-loading-text="保存中..." onclick="document.getElementById('reversion').value='0';document.getElementById('ueditorform').onsubmit();" >保存</button>&nbsp;&nbsp;<button type="button" id="ueditorform_btn_1" class="btn btn-info" data-loading-text="保存中..." onclick="document.getElementById('reversion').value='1';document.getElementById('ueditorform').onsubmit();" >保存为新版本</button><small id="autosaveTime" class="pull-right " style="color:#999;padding:0 10px"></small></p>
+       </form>
+
+ <script type="text/javascript">
+  function validate(form){
+	  needsave=0;
+	  window.onbeforeunload=null;
+	 try{ 
+	    api.win.needsave=0;
+	    api.setFileExt([]);
+	  }catch(e){}
+	  var newreversion=document.getElementById('reversion').value;
+	   document.getElementById('autosave').value='0';
+	  document.getElementById('message').value=UE.getEditor('editor1').getContent();
+	  jQuery('#ueditorform_btn_'+newreversion).button('loading');
+	  ajaxpost(form.id,'ueditorform_btn_'+newreversion,'ueditorform_btn_'+newreversion,null,null,function(){
+		  window.setTimeout(function(){jQuery('#ueditorform_btn_'+newreversion).button('reset');},3000);
+	  });
+  }
+  function succeedhandle_ueditorform(url, message, values) {
+	var data= eval('(' + decodeURIComponent(values['data']) + ')');
+	if(data.autosave<1){
+		getTopicListByFid(data.id);
+		 try{ 
+			api.setFileExt([]);
+		  }catch(e){}
+	}
+	jQuery('#autosaveTime').html('最后一次自动保存时间：'+ new Date().format('hh:mm:ss'));
+  };
+var autoTimer=null;
+	function AutoSave(){
+		i=0;
+		if(autoTimer) window.clearTimeout(autoTimer);
+		window.setTimeout(AutoSaveHander,5000);
+	}
+	function AutoSaveHander(){
+		var form=document.getElementById('ueditorform');
+		if(!form) return;
+		 needsave=0;
+		 try{ 
+			api.win.needsave=0;
+		  }catch(e){}
+		  var newreversion='0';
+		  document.getElementById('reversion').value='0';
+		  document.getElementById('autosave').value='1';
+		  document.getElementById('message').value=UE.getEditor('editor').getContent();
+		  jQuery('#ueditorform_btn_'+newreversion).button('loading');
+		  ajaxpost(form.id,'ueditorform_btn_'+newreversion,'ueditorform_btn_'+newreversion,null,null,function(){
+			  window.setTimeout(function(){jQuery('#ueditorform_btn_'+newreversion).button('reset');},3000);
+		  });
+	}
+  jQuery(document).ready(function(e) {
+	
+	  var ue = UE.getEditor('editor1', {
+		  	UEDITOR_HOME_URL:SITEURL+'dzz/system/ueditor/',
+			serverUrl:SITEURL+DZZSCRIPT + "?mod=attach&op=controller",
+			focus: true,
+			zIndex : 1900,
+			formid:'ueditorform',
+			iframeCssUrl:'dzz/system/ueditor/themes/iframe1.css',
+			<!--{if $ismobile}-->
+			toolbars: UEDITOR_CONFIG.mode.mini,
+			autoHeightEnabled:false,
+			<!--{else}-->
+			toolbars: UEDITOR_CONFIG.mode.simple,
+			<!--{/if}-->
+			initialFrameWidth:'100%', //初始化编辑器宽度,默认500
+			topOffset:jQuery('.bs-main-container').offset().top+1,
+			scrollContainer:'.bs-main-container'
+		});  
+		
+		ue.addListener( 'contentChange', function(  ) {
+			 needsave=1;
+			 try{api.win.needsave=needsave;}catch(e){}
+			 i++;
+			 if(i>10) AutoSave();
+		 });
+		 <!--{if $ismobile}-->
+		 ue.ready(function(editor){
+			ue.setHeight(jQuery('.bs-main-container').outerHeight(true)-jQuery('#edui1_toolbarbox').outerHeight(true)-60);
+		 });
+		 <!--{/if}-->
+	});	
+ 	
+		
+	
+	
+	window.onbeforeunload=function(){
+		try{
+			api.setFileExt([]);
+		}catch(e){}
+		if(needsave>0) return '当前内容没有保存，确定要离开吗？';
+		
+	}
+	Date.prototype.format = function(format) {
+		   var date = {
+				  "M+": this.getMonth() + 1,
+				  "d+": this.getDate(),
+				  "h+": this.getHours(),
+				  "m+": this.getMinutes(),
+				  "s+": this.getSeconds(),
+				  "q+": Math.floor((this.getMonth() + 3) / 3),
+				  "S+": this.getMilliseconds()
+		   };
+		   if (/(y+)/i.test(format)) {
+				  format = format.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length));
+		   }
+		   for (var k in date) {
+				  if (new RegExp("(" + k + ")").test(format)) {
+						 format = format.replace(RegExp.$1, RegExp.$1.length == 1
+								? date[k] : ("00" + date[k]).substr(("" + date[k]).length));
+				  }
+		   }
+		   return format;
+	}
+</script>

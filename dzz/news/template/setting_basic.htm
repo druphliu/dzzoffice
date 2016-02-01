@@ -1,0 +1,85 @@
+
+    <div class="main-content clearfix" style="padding:15px;">
+      <form id="newsform" name="newsform" class="form-horizontal-left form-horizontal" action="{BASESCRIPT}?mod=news&op=setting&do=basic" method="post" >
+        <input type="hidden" name="settingsubmit" value="true" />
+        <input type="hidden" name="formhash" value="{FORMHASH}" />
+        <dl>
+          <dt>管理员设置<small>（<b id="count_moderator">{eval echo count($moderators);}</b>）</small>:</dt>
+          <dd class="clearfix">
+            <ul id="news_moderator" class="list-unstyled clearfix" >
+              <li  class=" pull-left" style="padding:10px;width:110px">
+                <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <a href="{DZZSCRIPT}?mod=news&op=setting&operation=selectuser&type=1"><img style="margin:10px" src="dzz/news/images/create.png" width="66" height="66" /></a> </div>
+                <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span ><a href="{DZZSCRIPT}?mod=news&op=setting&operation=selectuser&type=1">添加管理成员</a></span> </p>
+              </li>
+              
+              <!--{loop $moderators $value}-->
+              
+              <li id="moderator_{$value[uid]}" perm="$value[perm]" class="user-item pull-left" style="padding:10px;width:110px;position:relative"> <a href="javascrip:;" class="delete" onclick="deleteUser('{$value[uid]}','1');return false" style="position:absolute;top:0px;right:0px;"><i style="color:#d2322d;font-size:16px" class="glyphicon glyphicon-remove-sign"></i></a>
+                <input type="hidden" name="moderators[]" value="$value[uid]" />
+                <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <img src="avatar.php?uid=$value[uid]&size=middle" width="85" height="85" /> </div>
+                <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span> $value[username]</span> </p>
+              </li>
+              <!--{/loop}-->
+              
+            </ul>
+          </dd>
+        </dl>
+        <dl>
+          <dt>信息发布权限:</dt>
+          <dd class="clearfix">
+            <label class="radio-inline "><input type="radio" name="settingnew[allownewnews]" value="0"<!--{if !$setting['allownewnews']}-->checked<!--{/if}--> onclick="jQuery('#allownewnewnews_users').hide()">全站用户</label>
+          </dd>
+          <dd class="clearfix">
+            <label class="radio radio-inline"><input type="radio"  name="settingnew[allownewnews]" value="1"<!--{if $setting['allownewnews']>0}-->checked<!--{/if}--> onclick="jQuery('#allownewnewnews_users').show();">指定用户</label>
+          </dd>
+          <dd class="clearfix"> <dl id="allownewnewnews_users" class="mt20" <!--{if $setting[allownewnews]==0}-->style="display:none"<!--{/if}-->>
+          <dt>允许发布信息的用户<small>（<b id="count_poster">{eval echo count($posters);}</b>）</small>:</dt>
+          <dd class="clearfix">
+            <ul id="news_poster" class="list-unstyled clearfix" >
+              <li  class=" pull-left" style="padding:10px;width:110px">
+                <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <a href="{DZZSCRIPT}?mod=news&op=setting&operation=selectuser"><img style="margin:10px" src="dzz/news/images/create.png" width="66" height="66" /></a> </div>
+                <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span ><a href="{DZZSCRIPT}?mod=news&op=setting&operation=selectuser">添加成员</a></span> </p>
+              </li>
+              
+              <!--{loop $posters $value}-->
+              
+              <li id="poster_{$value[uid]}" perm="$value[perm]" class="user-item pull-left" style="padding:10px;width:110px;position:relative"> <a href="javascrip:;" class="delete" onclick="deleteUser('{$value[uid]}','0');return false" style="position:absolute;top:0px;right:0px;"><i style="color:#d2322d;font-size:16px" class="glyphicon glyphicon-remove-sign"></i></a>
+                <input type="hidden" name="posters[]" value="$value[uid]" />
+                <div class="thumbnail" style="width:90px;height:90px;margin:0;padding:2px;"> <img src="avatar.php?uid=$value[uid]&size=middle" width="85" height="85" /> </div>
+                <p class="text-center" style="height:20px;margin:5px 0;line-height:25px;overflow:hidden;"> <span> $value[username]</span> </p>
+              </li>
+              <!--{/loop}-->
+              
+            </ul>
+          </dd>
+        </dl>
+        
+        
+        <dl>
+          <dt>信息审核：</dt>
+          <dd class="clearfix">
+            <label class="radio-inline "><input type="radio" name="newsmod" value="0"<!--{if !$setting[newsmod]}-->checked<!--{/if}-->>不需要审核</label>
+          </dd>
+          <dd class="clearfix">
+            <label class="radio radio-inline"><input type="radio"  name="newsmod" value="1"<!--{if $setting[newsmod]=='1'}-->checked<!--{/if}-->>需要审核（管理员例外）</label>
+          </dd>
+         
+        </dl>
+        <input class="btn btn-primary"  name="settingsubmit_btn" value="保存更改" type="submit" >
+      </form>
+    </div>
+
+<script type="text/javascript">
+  
+
+function deleteUser(uid,type){
+	jQuery.getJSON(DZZSCRIPT+'?mod=news&op=setting&operation=deleteModerator',{'uid':uid,'type':type},function(json){
+		if(json.error){
+			alert(json.error);
+		}else{
+			jQuery('#'+(type>0?'moderator':'poster')+'_'+uid).remove();
+			jQuery('#count_'+(type>0?'moderator':'poster')).html(parseInt(jQuery('#count_'+(type>0?'moderator':'poster')).html())-1);
+		}
+	});
+}
+</script> 

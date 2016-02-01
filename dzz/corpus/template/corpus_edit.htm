@@ -1,0 +1,149 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/corpus/images/corpus.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script>
+<style>
+html,body{
+	overflow:hidden;
+}
+.bs-main-container{
+	overflow:auto;
+	margin-left:0;
+}
+</style>
+
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0">
+    <!--{template corpus_top}--> 
+</nav>
+<div class="bs-container clearfix">
+<div class="bs-main-container">
+    <div class="main-content clearfix" style="padding:15px;">
+    	<form id="corpusform" name="corpusform" class="form-horizontal-left form-horizontal" action="{BASESCRIPT}?mod=corpus&op=newcorpus" method="post" onsubmit="return validate(this);" >
+            <input type="hidden" name="corpussubmit" value="true" />
+            <input type="hidden" name="cid" value="$cid" />
+            <input type="hidden" name="refer" value="$refer" />
+            <input type="hidden" name="formhash" value="{FORMHASH}" />
+              <div class="form-group">
+                <label class="control-label " for="name">文集名称：</label>
+                <input type="text" class="form-control" id="name"  name="name" autocomplete="off" value="$corpus[name]" onkeyup="jQuery('.corpus-item-title').html(this.value);" maxlength="80">
+              </div>
+              <div class="form-group">
+                <label class="control-label ">选择封面：</label>
+                <input type="hidden"  id="aid"  name="aid" autocomplete="off" value="$corpus[aid]">
+                <div class="controls cover-op" style="">
+                	<a class="cover-op-prev" href="javascript:;" onclick="moveCoverBack('prev')"></a>
+                    <a class="cover-op-next" href="javascript:;" onclick="moveCoverBack('next')"></a>
+                    <div class="corpus-item" style="margin:0;">
+                        <div class="corpus-item-back" style="overflow:hidden">
+                        	{eval $width=count($covers)*171;}
+                            <ul id="cover_ul" class="cover-ul list-unstyled clearfix" style="left:{$left}px;width:{$width}px;">
+                        		<!--{loop $covers $key $value}-->
+                                <li id="cover_ul_{$key}" class="pull-left cover-item"  data-aid="$value[aid]" > 
+                                    <img  src="$value[img]" >
+                                </li>
+                               <!--{/loop}-->
+                            </ul>
+                        </div>
+                        <div class="corpus-item-upper" >
+                            <div class="corpus-item-title" <!--{if $corpus[titlehide]}-->style="display:none"<!--{/if}-->>$corpus[name]</div>
+                        </div>
+                    </div>
+                   <div style="padding:10px;"><button class="btn btn-primary needindzz" onclick="uploadfrom_desktop()">从桌面选择图片</button></div>
+                </div>
+                
+              </div>
+              <div class="form-group">
+                <label class="control-label " for="name">封面标题：</label>
+                <div  class="controls ml20"> 
+                    <label class="radio radio-inline"><input type="radio" name="titlehide" value="0" <!--{if $corpus[titlehide]<1}-->checked<!--{/if}--> onclick="jQuery('.corpus-item-title').show();">显示 </label>
+                    <label class="radio radio-inline"><input type="radio" name="titlehide" value="1" <!--{if $corpus[titlehide]>0}-->checked<!--{/if}--> onclick="jQuery('.corpus-item-title').hide();">隐藏</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label " for="name">权限设置：</label>
+                <div  class="controls ml20"> 
+                    <label class="radio radio-inline"><input type="radio" name="perm" value="0" <!--{if $corpus[perm]<1}-->checked<!--{/if}-->>公开 </label>
+                    <label class="radio radio-inline"><input type="radio" name="perm" value="1" <!--{if $corpus[perm]>0}-->checked<!--{/if}-->>隐私</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label " for="name">评论设置：</label>
+                <div  class="controls ml20"> 
+                    <label class="radio radio-inline"><input type="radio" name="forbidcommit" value="0" <!--{if $corpus[forbidcommit]<1}-->checked<!--{/if}-->>允许评论 </label>
+                    <label class="radio radio-inline"><input type="radio" name="forbidcommit" value="1" <!--{if $corpus[forbidcommit]>0}-->checked<!--{/if}-->>关闭评论</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" ></label>
+                <input id="editbutton" class="btn btn-primary" name="editbutton" value="<!--{if $cid}-->保存设置<!--{else}-->创  建<!--{/if}-->"  type="submit">
+              </div>
+        </form>
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout(); 
+function validate(form){
+	if(form.name.value==''){
+		form.name.focus();
+		return false;
+	}
+	return true;
+}
+var movingTimer=false;
+function moveCoverBack(type){
+	if(movingTimer) jQuery('#cover_ul').stop(true,true);
+	movingTimer=true;
+	var width=jQuery('#cover_ul li').width();
+	var maxwidth=jQuery('#cover_ul').width();
+	var currentLeft=parseInt(jQuery('#cover_ul').css('left'));
+	switch(type){
+		case 'next':
+			var newleft=Math.abs(currentLeft-width)>=maxwidth?0:currentLeft-width;
+			break;
+		case 'prev':
+			var newleft=(currentLeft+width)<=0?(currentLeft+width):(-maxwidth+width);
+			break;
+	}
+	jQuery('#cover_ul').animate({'left':newleft},500,function(){movingTimer=false;});
+	var index=Math.abs(newleft/width);
+	jQuery('#aid').val(jQuery('#cover_ul_'+index).data('aid'));
+}
+function uploadfrom_desktop(){
+	top.OpenFile('open','打开文件',{image:['图像(*.jpg,*.jpeg,*.png,*.gif)',['IMAGE','JPG','JPEG','PNG','GIF'],'']},{bz:'',multiple:false},function(data){//只打开本地盘
+		var datas=[];
+		if(data.params.multiple){
+			datas=data.icodata
+		}else{
+			datas=[data.icodata];
+		}
+		var html='';
+		var width=jQuery('#cover_ul li').width();
+		var maxwidth=jQuery('#cover_ul').width();
+		var index=Math.abs(maxwidth/width);
+		var aid=0;
+		for(var i in datas){
+			var img=DZZSCRIPT+'?mod=io&op=thumbnail&width=171&height=225&path='+(datas[i].apath?datas[i].apath:datas[i].dpath);
+			    html+='<li id="cover_ul_'+index+'" class="pull-left cover-item"  data-aid="'+datas[i].aid+'" >’';
+				html+='      <img src="'+img+'" >';
+				html+='</li>';
+				aid=datas[i].aid;
+		}
+		if(html!=''){
+			jQuery('#cover_ul').append(html);
+			jQuery('#cover_ul').css('width',(index+1)*width);
+			jQuery('#cover_ul').css('left',-index*width);
+			jQuery('#aid').val(aid);
+		}
+	});
+}
+jQuery(document).ready(function(e) {
+	
+	 if(!top._config) jQuery('.needindzz').hide();
+});
+</script>
+
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script>
+<!--c847417817641cfe67af4008fac750a0-->
+<!--{template common/footer_simple}--> 

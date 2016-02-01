@@ -1,0 +1,12 @@
+
+<!--{loop $list $value}-->
+    <a class="corpus-item pull-left" data-cid="$value[cid]" data-perm="value[perm]" data-userperm="$value[userperm]" href="{DZZSCRIPT}?mod=corpus&op=list&cid=$value[cid]" onclick="return checkViewPerm(this);">
+        <span class="corpus-item-back" >
+           <!--{if $value[img]}--><img src="$value[img]" /><!--{/if}-->
+        </span>
+        <span class="corpus-item-upper">
+             <!--{if !$value[titlehide]}--><span class="corpus-item-title">$value[name]</span><!--{/if}-->
+             <span class="corpus-item-guide <!--{if $value[perm]>0}-->private<!--{/if}-->"> </span>
+        </span>
+    </a>
+ <!--{/loop}-->

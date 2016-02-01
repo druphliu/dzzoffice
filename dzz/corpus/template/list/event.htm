@@ -1,0 +1,67 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/corpus/images/event.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script> 
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0"> 
+  <!--{template corpus_list_top}--> 
+</nav>
+<style>
+html,body{
+	overflow:hidden;
+}
+.bs-main-container{
+	margin-left:0;
+	overflow:auto;
+}
+
+</style>
+<div class="bs-container clearfix">
+<div class="bs-main-container">
+<div class="main-content clearfix" style="padding:15px;">
+<select id="select-member" class="form-control pull-right" style="width:100px;padding:2px 12px;height:26px;" onchange="redirect(this)">
+          <option value="0">所有人</option>
+          <!--{loop $users $user}-->
+          <option <!--{if $user[uid]==$uid}--> selected="selected" <!--{/if}--> value="$user[uid]">$user[username]</option>
+          <!--{/loop}-->
+        </select>
+  <div class="container workspace">
+    <div class="page" id="page-progress" >
+      <div class="page-inner">
+        <h2></h2>
+        
+        <!--{template list/event_item}-->
+        
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout(); 
+jQuery('.bs-main-container').scroll(function(e) {
+	var clientHeight = jQuery('.bs-main-container').height();
+	var scrollHeight = jQuery('.main-content').height();
+    if(jQuery('.bs-main-container').scrollTop()+clientHeight>scrollHeight-20) jQuery('#btn-load-more').trigger('click');
+});
+function redirect(obj){
+	location.href=DZZSCRIPT+'?mod=corpus&op=list&do=event&cid={$cid}&uid='+obj.value;
+}
+function getEventMore(date,uid){
+	jQuery('#btn-load-more').html('正在加载...');
+	jQuery.get(DZZSCRIPT+'?mod=corpus&op=list&do=event&operation=getEventByDate&cid={$cid}',{'date':date,'uid':uid},function(html){
+		jQuery('#btn-load-more').replaceWith(html);
+	});
+}
+jQuery(document).ready(function(e) {
+	jQuery(document).on('mouseenter','.user-item',function(){
+		jQuery(this).addClass('hover');
+	});
+	jQuery(document).on('mouseleave','.user-item',function(){
+		jQuery(this).removeClass('hover');
+	});
+});
+</script> 
+
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script> 
+<!--{template common/footer_simple}--> 

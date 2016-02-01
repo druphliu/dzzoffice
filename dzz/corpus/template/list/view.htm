@@ -1,0 +1,75 @@
+<link href="dzz/corpus/images/document.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/system/ueditor/third-party/dzzattach/dzzattach.css?{VERHASH}"  rel="stylesheet"  media="all">
+<script src="dzz/system/ueditor/ueditor.parse.js?{VERHASH}"></script>
+<script src="dzz/system/ueditor/third-party/dzzattach/dzzattach.js?{VERHASH}" type="text/javascript"></script>
+<script type="text/javascript">  
+try{
+	var api=_api.init();
+	api.win.needsave=0;
+	api.setFileExt([]);
+}catch(e){}
+</script>
+	<!--{if $version>0 && count($versions)>1 }-->
+    	<div class="document-header clearfix">
+           <div class="document-info clearfix ">           
+               <a class="pull-left" href="javascript:;" onclick="getTopicListByFid('{$class['fid']}')"><i class="glyphicon glyphicon-hand-left"></i>&nbsp;返回</a>
+               <div class="dropdown pull-left"><a href="javascript:;" id="document_reversion" class="pull-left " data-toggle="dropdown"> <i class="glyphicon glyphicon-leaf"></i>&nbsp;<b>#{$version}：</b>{eval echo dgmdate($current[dateline])} by {$current[username]}</span><b class="caret"></b></a>
+                    <ul  class="dropdown-menu" role="menu" aria-labelledby="document_reversion">
+                    <!--{loop $versions $value1}-->
+                      <li role="presentation"><a href="javacript:;" tabindex="-1" role="menuitem" onclick="getTopicListByFid('$class[fid]','$value1[version]');return false"><b>#{$value1[version]}：</b>{eval echo dgmdate($value1[dateline])} by {$value1[username]}</a></li>
+                    <!--{/loop}-->
+                   </ul>
+                </div>
+               <!--{if $corpus[perm]>2 && count($versions)>1 && $corpus['archivetime']<1}--> <a class="pull-right" href="javascript:;" onclick="if(confirm('确定要删除文档的当前版本吗？')){deleteTopicVersion('{$class[fid]}','{$version}');return false;}else{return false}" title="删除此版本"><i class="glyphicon glyphicon-remove"></i>&nbsp;删除此版本</a><!--{/if}-->  
+                <!--{if $document[version]!=$version &&  $corpus[perm]>1 && $corpus['archivetime']<1}--><a class="pull-right" href="javascript:;" onclick="if(confirm('确定要删除文档的当前版本吗？')){applyTopicVersion('{$class[fid]}','{$version}');return false;}else{return false}"><i class="glyphicon glyphicon-ok"></i>&nbsp;使用此版本 </a> <!--{/if}--> 
+          </div>
+        </div>
+   <!--{else}-->
+   <div class="document-operation-container">
+       <div class="document-operation"> 
+       			 <a class="share_to_desktop pull-right" href="$_G[siteurl]{DZZSCRIPT}?mod=corpus&op=list&cid=$cid&fid={$class[fid]}" title="创建桌面快捷方式"><i class="glyphicon glyphicon-share"></i></a>
+                      			
+                    <!--{if $document[version]>1}--><a  class="pull-right" href="javascript:;"  title="所有版本" onclick="getTopicListByFid('$class[fid]','$document[version]');return false"><i class="glyphicon glyphicon-leaf"></i></a> <!--{/if}-->
+                     
+                    <!--{if $corpus[perm]>1 && $corpus['archivetime']<1}--><a class="pull-right" href="javascript:;" onclick="if(confirm('确定要删除此文档吗？')){deleteTopic('{$class[fid]}');return false;}else{return false}" title="删除"><i class="glyphicon glyphicon-remove"></i></a> <!--{/if}-->
+                     
+                    <!--{if $corpus[perm]>1 && $corpus['archivetime']<1}--><a class="pull-right" href="{DZZSCRIPT}?mod=corpus&op=list&cid=$cid&fid={$class[fid]}" title="编辑" onclick="editTopic('$class[fid]','edit');return false;"><i class="glyphicon glyphicon-edit"></i></a><!--{/if}-->
+                  
+    	 </div>
+     </div>
+    <!--{/if}-->
+    
+    	<div class="document-container clearfix" >
+            	<h3 class="document-subject" >
+                	<span class="subject">$class[fname]</span>
+                    <small>
+                     	 &nbsp;<a href="user.php?uid=$document[uid]" target="_blank">$document[username]</a>&nbsp; &nbsp;$document[dateline]   
+                    </small>
+                </h3>
+            <div class="document-body clearfix">$str</div>
+            <!--{if !$version }--> 
+             <a name="comment_container"></a>
+            <div id="comment_container" class="document-comment clearfix">
+            		<script type="text/javascript"> ajaxget('{DZZSCRIPT}?mod=comment&op=ajax&do=getcomment&id=$class[fid]&idtype=corpus&allowattach=3&allowat=0&allowsmiley=1','comment_container','comment_container')</script>
+            </div>
+            <!--{if $_G[uid] && !$corpus['forbidcommit']}-->
+            <a name="comment_reply_form"></a>
+             <div id="comment_reply_form" class="comment-reply-form clearfix">
+             	 <div class="itemfeed" >
+                 	<div class="left_ifed"> <a href="user.php?uid=$_G[uid]" title="$_G[username]" hidefocus="true"><img width="50" height="50" src="avatar.php?uid=$_G[uid]" alt="$_G[username]"></a> </div>
+                     <div  class="cmt_fed right-ifed" id="corpus_reply"> 
+                     <script type="text/javascript">ajaxget('{DZZSCRIPT}?mod=comment&op=ajax&do=getPublishForm&module=corpus&id=$class[fid]&idtype=corpus&allowattach=3&allowat=0&allowsmiley=1','corpus_reply','corpus_reply')</script>
+                     </div>
+                 </div>
+             </div>
+              <!--{/if}-->
+           <!--{/if}-->
+        </div>
+<script type="text/javascript" >
+jQuery(document).ready(function(e) {
+  jQuery('.document-body .attach-item img').css({width:'auto',height:'auto','max-width':'100%'});
+  jQuery('span.attach-item img').css({width:'auto',height:'auto','max-width':'100%','padding-right':'5px'});
+  uParse('.document-body',{'rootPath':'dzz/system/ueditor'});
+  dzzattach.init('.document-body');
+});
+</script>

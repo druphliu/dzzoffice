@@ -1,0 +1,221 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<!--{if $perm>1}-->
+<link href="static/colorPicker/jquery.colorPicker.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/news/images/popbox.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/news/images/datepicker.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="static/icheck/skins/minimal/blue.css?{VERHASH}" rel="stylesheet" media="all">
+<!--{/if}-->
+<link href="dzz/news/images/news.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script>
+<script type="text/javascript" src="dzz/scripts/_common.js?{VERHASH}"></script>
+<style>
+html, body {
+	overflow: hidden;
+}
+.bs-left-container {
+	width:120px;
+}
+.bs-main-container {
+	margin-left: 120px;
+	overflow: auto;
+}
+@media (max-width: 768px){
+	.bs-left-container {
+		display:none;
+	}
+	.bs-main-container {
+		margin-left: 0;
+	}
+}
+</style>
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0;"> 
+  <!--{template news_top}--> 
+</nav>
+<div class="bs-container clearfix">
+  <div class="bs-left-container  clearfix">
+    <div class="cat-container" id="cat_0"> $catlist </div>
+  </div>
+  <div class="left-drager">
+     <div class="left-drager-op"><div class="left-drager-sub"></div></div>
+  </div>
+  <div class="bs-main-container">
+    <div class="main-content clearfix" >
+      <table class="table table-hover ">
+        <!--{if $perm>0}-->
+        <tr>
+          <td colspan="10" >&nbsp;
+              <!--{if $perm>1}-->
+              <input type="checkbox" name="chkall" id="chkall" >
+              <!--{/if}--> 
+              <!--{if $perm>0}--><a href="{DZZSCRIPT}?mod=news&op=edit&catid=$catid"  class="btn btn-primary" style="padding:6px 25px">新建</a> <!--{/if}--> 
+              <!--{if $perm>1}--> 
+              &nbsp;&nbsp;
+              <button class="btn btn-simple js-popbox" style="display:none" id="news_op_menu" data-href="newsmenu&status=$status" data-placement="bottom" data-auto-adapt="true">操作选项 <i class="caret"></i></button>
+              
+              <!--{/if}--> 
+              
+             
+            </td>
+            </tr>
+             <!--{/if}--> 
+          <!--{loop $data $value}-->
+        <tr>
+          <td class="list-td" 
+              <!--{if $ismobile}-->
+                   <!--{if $value[type]==2}--> 
+                   onclick="news_click('$value[newid]');"
+                   <!--{else}--> 
+                    onclick="location.href='{DZZSCRIPT}?mod=news&op=view&newid=$value[newid]&refer=$refer'"
+                  <!--{/if}-->
+              <!--{/if}-->
+          >
+          <div class="list-title" > 
+              <!--{if $perm>1}-->
+              <input type="checkbox"  name="chk" value="$value[newid]">
+              <!--{/if}--> 
+              <!--{if $value[votestatus]}--> 
+              <i class="icon glyphicon glyphicon-stats <!--{if $value[isread]}-->gray<!--{else}-->primary<!--{/if}-->"></i> 
+              <!--{elseif $value[type]==1}--> 
+              <i class="icon glyphicon glyphicon-picture <!--{if $value[isread]}-->gray<!--{else}-->primary<!--{/if}-->"></i> 
+              <!--{elseif $value[type]==2}--> 
+              <i class="icon glyphicon glyphicon-new-window <!--{if $value[isread]}-->gray<!--{else}-->primary<!--{/if}-->"></i> 
+              <!--{else}--> 
+              <i class="icon glyphicon glyphicon-file <!--{if $value[isread]}-->gray<!--{else}-->primary<!--{/if}-->"></i> 
+              <!--{/if}--> 
+              <!--{if $value[type]==2}--> 
+              <a class="title" href="$value[url]" onclick="news_click('$value[newid]');" target="_blank" > <span <!--{if $value[ishighlight]}-->style="$value[highlightstyle]" title="高亮截止日期：{eval echo dgmdate($value[highlightendtime],'Y-m-d');}"<!--{/if}-->>$value[subject]</span> 
+              <!--{if $value[istop]}-->&nbsp;<img src="dzz/news/images/pin_{$value[istop]}.gif" title="置顶截止日期：{eval echo dgmdate($value[topendtime],'Y-m-d');}"><!--{/if}--> 
+              </a> 
+              <!--{else}--> 
+              <a class="title" href="{DZZSCRIPT}?mod=news&op=view&newid=$value[newid]&refer=$refer" > <span <!--{if $value[ishighlight]}-->style="$value[highlightstyle]" title="高亮截止日期：{eval echo dgmdate($value[highlightendtime],'Y-m-d');}"<!--{/if}-->>$value[subject]</span> 
+              <!--{if $value[istop]}-->&nbsp;<img src="dzz/news/images/pin_{$value[istop]}.gif" title="置顶截止日期：{eval echo dgmdate($value[topendtime],'Y-m-d');}"><!--{/if}--> 
+              </a> 
+              <!--{/if}--> 
+              <!--{if $perm>1 || $value['authorid']==$_G[uid]}--> 
+              <a class="edit" href="{DZZSCRIPT}?mod=news&op=edit&newid=$value[newid]" title="编辑"><i class="ibtn glyphicon glyphicon-edit"></i> </a> <a class="delete" href="javascript:;" title="删除" newid="$value[newid]" onclick="news_delete(this)"><i class="ibtn glyphicon glyphicon-trash"></i> </a> 
+              <!--{/if}--> 
+            </div>
+            
+            <!--{if $value['status']==2 && $value[moduid]>0}-->
+            
+            <div class="alert alert-warning mod_back_reason" style="margin:10px 0 10px 30px;">
+              <p class="mb10"><a href="user.php?uid=$value[moduid]">$value[modusername]</a> 退回于  {eval echo dgmdate($value[modtime],'u');}</p>
+              <p><b>退回原因：</b>$value['modreason']</p>
+            </div>
+            <!--{/if}-->
+            <!--{if !$ismobile}-->
+            <div class="list-info"> 
+              <!--{if $value['opuid']}--> 
+              <a href="javascript:;" title="最后修改"  class="poster">$value[opauthor]&nbsp;{eval echo dgmdate($value[updatetime],'u');}</a> 
+              <!--{else}-->
+               <a href="javascript:;" title="发布者"  class="poster">$value[author]&nbsp;{eval echo dgmdate($value[dateline],'u');}</a> 
+              <!--{/if}--> 
+              
+              <!--{if $value['views']}--><a href="javascript:;" title="查看次数" class="views"><i class="glyphicon glyphicon-eye-open"></i> $value[views]</a><!--{/if}--> 
+              <!--{if $value['comments']}--><a href="javascript:;" title="评论次数" class="views"><i class="glyphicon glyphicon-comment"></i> $value[comments]</a><!--{/if}--> 
+              <!--{if $value['status']==2 && $perm<2}-->
+              <button class="btn btn-link btn-sm" style="padding:0 5px;" data-loading-text="信息发送中..." onclick="sendModMessage(this,'$value[newid]')" title=""><i class="glyphicon glyphicon-bell"></i> 提醒管理员审核</button>
+              <!--{/if}--> 
+            </div>
+                      
+            <!--{/if}--> 
+          <td></td>
+        </tr>
+        <!--{/loop}-->
+        <!--{if $multi}--> 
+        <tr>
+          <td colspan="10" >
+             
+              $multi 
+            </td>
+            </tr>
+            <!--{/if}--> 
+      </table>
+    </div>
+  </div>
+</div>
+<div class="popbox clearfix" style="display: none;">
+  <div class="loadding"></div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout(null,{'cookieid':'news_index'});
+jQuery(document).ready(function(e) {
+   
+  //更新浏览数
+  jQuery(document).on('click','.share_to_desktop',function(){
+	  jQuery.getJSON(DZZSCRIPT+'?mod=system&op=dzzcp&do=linktodesktop&link='+encodeURIComponent(this.href),function(json){
+		  if(json.error){
+			  alert(json.error);
+		  }else{
+			  try{
+				  parent._ico.createIco(json);
+				 parent.showmessage('成功添加桌面快捷方式','success',3000,1);
+			  }catch(e){
+				  alert('成功添加桌面快捷方式');
+			  }
+		  }
+	  });
+	  return false;
+  });
+  <!--{if $perm>1}-->
+  
+  	jQuery('.js-popbox').each(function(){
+			jQuery(this).popbox();
+		});
+	  jQuery('input').iCheck({
+			  checkboxClass: 'icheckbox_minimal-blue',
+			  radioClass: 'iradio_minimal-blue',
+			});
+		jQuery('#chkall').on('ifChecked',function(){
+			jQuery('input[name=chk]').iCheck('check');
+		});
+		jQuery('#chkall').on('ifUnchecked',function(){
+			jQuery('input[name=chk]').iCheck('uncheck');
+		});
+		jQuery('input[name=chk]').on('ifChecked',function(){
+			jQuery('#news_op_menu').show().trigger('click');
+		});
+		jQuery('input[name=chk]').on('ifUnchecked',function(){
+			var opened=0;
+			jQuery('input[name=chk]').each(function(){
+				if( jQuery(this).prop('checked')){
+					 opened=1;
+					 return ;
+				}
+			});
+			if(!opened){
+				jQuery('#news_op_menu').hide();
+				jQuery('.popbox .close').trigger('click');;
+			}
+		});
+		
+		jQuery('.table-news-list tr').mouseenter(function(){
+			jQuery(this).find('.list-op').show().end().find('.list-views').hide();;
+			
+		});
+		jQuery('.table-news-list tr').mouseleave(function(){
+			jQuery(this).find('.list-op').hide().end().find('.list-views').show();;
+			
+		});
+	<!--{/if}-->
+});
+
+</script> 
+<!--{if $perm>1}--> 
+<!--弹出菜单--> 
+<script type="text/javascript" src="dzz/news/scripts/jquery.popbox.js?{VERHASH}"></script> 
+<!--icheck--> 
+<script type="text/javascript" src="static/icheck/icheck.min.js?{VERHASH}"></script> 
+<!--datepicker--> 
+<script  type="text/javascript" src="static/js/jquery.ui.core.js?{VERHASH}"></script> 
+<script  type="text/javascript" src="static/js/datepicker/jquery.ui.datepicker.js?{VERHASH}"></script> 
+<script  type="text/javascript" src="static/js/datepicker/jquery.datepicker-zh-CN.js?{VERHASH}"></script> 
+<!--colorPicker--> 
+<script  type="text/javascript" src="static/colorPicker/jquery.colorPicker.js?{VERHASH}"></script> 
+<!--{/if}--> 
+<script type="text/javascript" src="dzz/news/scripts/news.js?{VERHASH}"></script> 
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script> 
+<!--f8b5ecdc1c3eb0725f1d38f5f0216d53--> 
+<!--{template common/footer_simple}--> 

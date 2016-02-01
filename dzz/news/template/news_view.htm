@@ -1,0 +1,293 @@
+<!--{template common/header_simple_start}-->
+<link href="static/css/common.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/system/ueditor/third-party/dzzattach/dzzattach.css?{VERHASH}"  rel="stylesheet"  media="all">
+<!--{if $news['commentstatus']}-->
+<link href="dzz/styles/showwindow/style.css?{VERHASH}" rel="stylesheet" media="all">
+<link href="dzz/comment/images/comment.css?{VERHASH}" rel="stylesheet" media="all">
+
+<script type="text/javascript" src="dzz/scripts/_common.js?{VERHASH}"></script>
+
+<!--{/if}-->
+<link href="dzz/news/images/news.css?{VERHASH}" rel="stylesheet" media="all">
+<script type="text/javascript" src="static/js/jquery.leftDrager.js?{VERHASH}"></script>
+
+<style>
+html, body {
+	overflow: hidden;
+}
+.bs-left-container {
+	width: 120px;
+}
+.bs-main-container {
+	margin-left: 120px;
+	overflow: auto;
+}
+@media (max-width: 768px){
+	.bs-left-container {
+		display:none;
+	}
+	.bs-main-container {
+		margin-left: 0;
+	}
+}
+</style>
+<!--{template common/header_simple_end}-->
+<nav class="navbar navbar-default bs-navbar-default navbar-fixed-top" role="navigation" style="margin:0"> 
+  <!--{template news_view_top}--> 
+</nav>
+<div class="bs-container clearfix">
+  <div class="bs-left-container  clearfix">
+    <div class="cat-container" id="cat_0"> $catlist </div>
+  </div>
+  <div class="left-drager">
+     <div class="left-drager-op"><div class="left-drager-sub"></div></div>
+  </div>
+  <div class="bs-main-container">
+    <div class="main-content clearfix" > 
+      <!--{if $news['type']==0}-->
+      <div class="news-content content-document" >
+        <h1 class="subject text-center">$news['subject']</h1>
+        <div class=" content-document-body" > $news['content'] </div>
+        <!--{if $news['votestatus']}-->
+        <div class="content-vote" id="vote_container">
+            <script> ajaxget('{DZZSCRIPT}?mod=dzzvote&op=ajax&do=getvote&id=$news[newid]&idtype=news','vote_container','vote_container')</script>
+        </div>
+        <!--{/if}--> 
+        <div class="content-info clearfix">
+          <div class="info-item">
+            <div class="pull-left"><strong>信息：</strong></div>
+            <div class="info-item-publish"> <span>$news[author] 发布于 {eval echo dgmdate($news[dateline],'u');}</span> 
+              <!--{if $news['opuid']}--> 
+              <span class="pipe">|</span> <span>$news[opauthor] 修改于 {eval echo dgmdate($news[updatetime],'u');}</span> 
+              <!--{/if}--> 
+              <!--{if $news['moduid']}--> 
+              <span class="pipe">|</span> <span> $news[modusername] 审核于 {eval echo dgmdate($news[modtime],'u');}</span> 
+              <!--{/if}--> 
+              <!--{if $news['catname']}--> 
+              <span class="pipe">|</span> <span>分类：$news['catname']</span> 
+              <!--{/if}--> 
+            </div>
+          </div>
+          <div class="info-item " style="padding:0">
+            <div class="pull-left"><strong>范围：</strong></div>
+            <div class="info-item-org"> 
+              <!--{if !$sel_org && !$sel_user}--> 
+              	  <span >全部</span> 
+              <!--{else}--> 
+                  <!--{loop $sel_org $value}--> 
+                  <span > 
+                  <!--{if $value['forgid']}--> 
+                  <img src="dzz/system/images/department.png" /> 
+                  <!--{else}--> 
+                  <img src="dzz/system/images/organization.png" /> 
+                  <!--{/if}--> 
+                  $value[orgname] </span> 
+                  <!--{/loop}--> 
+                  <!--{loop $sel_user $value1}--> 
+                  <span> <img src="dzz/system/images/user.png" /> $value1[username] </span> 
+                  <!--{/loop}--> 
+              <!--{/if}--> 
+            </div>
+          </div>
+        </div>
+        
+        <!--{if $_G['uid']}--> 
+        <!--{if $news['commentstatus']}-->
+        <ul class="nav nav-underline" role="tablist">
+          <li class="active"><a href="#comment" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-comment"></i> 评论</a></li>
+          <li><a href="#view" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-eye-open"></i> 查阅情况</a></li>
+        </ul>
+        <!--{else}-->
+        <ul class="nav nav-underline" role="tablist">
+          <li class="active"><a href="#view" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-eye-open"></i> 查阅情况</a></li>
+        </ul>
+        <!--{/if}--> 
+        <!-- Tab panes -->
+        <div class="tab-content"> 
+          <!--{if $news['commentstatus']}-->
+          <div class="tab-pane active" id="comment">
+            <div class="content-comment"> <a name="comment_container"></a>
+              <div id="comment_container" class="document-comment clearfix"> 
+                <script type="text/javascript"> ajaxget('{DZZSCRIPT}?mod=comment&op=ajax&do=getcomment&idtype=news&id=$news[newid]&allowattach=3&allowat=0&allowsmiley=1','comment_container','comment_container')</script> 
+              </div>
+              <!--{if $news['commentstatus']}--> 
+              <a name="comment_reply_form"></a>
+              <div id="comment_reply_form" class="comment-reply-form clearfix">
+                <div class="itemfeed" >
+                  <div class="left_ifed"> <a href="user.php?uid=$_G[uid]" title="$_G[username]" hidefocus="true"><img width="50" height="50" src="avatar.php?uid=$_G[uid]" alt="$_G[username]"></a> </div>
+                  <div  class="cmt_fed right-ifed" id="documnet_reply"> 
+                    <script type="text/javascript">ajaxget('{DZZSCRIPT}?mod=comment&op=ajax&do=getPublishForm&id=$news[newid]&idtype=news&module=news&allowattach=3&allowat=0&allowsmiley=1','documnet_reply','documnet_reply')</script> 
+                  </div>
+                </div>
+              </div>
+              <!--{/if}--> 
+            </div>
+          </div>
+          <!--{/if}-->
+           <div class="tab-pane clearfix <!--{if !$news['commentstatus']}-->active <!--{/if}-->" id="view" style="padding:20px">
+           	<script type="text/javascript">ajaxget('{DZZSCRIPT}?mod=news&op=ajax&do=getViewerByNewid&newid=$newid','view','view');</script>
+          </div>
+        </div>
+        <!--{/if}--> 
+      </div>
+      
+      <!--{else}-->
+      <div class="news-content content-image" >
+        <h1 class="subject text-center">$news['subject']</h1>
+        <div class=" content-image-body">
+          <div id="carousel-generic" class="carousel slide" data-ride="carousel"> 
+            <!-- Indicators -->
+            <ol class="carousel-indicators" style="bottom:0">
+              {eval $i=0;} 
+              <!--{loop $pics $value}--> 
+              <li data-target="#carousel-generic" data-slide-to="$i" <!--{if $i==0}-->class="active"<!--{/if}-->>
+              </li>
+              {eval $i++} 
+              <!--{/loop}-->
+            </ol>
+            
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner"> {eval $i=0;} 
+              <!--{loop $pics $value}-->
+              <div class="item <!--{if $i==0}-->active<!--{/if}-->"> <img src="$value[url]" data-src="$value[url]"  style="margin:0 auto">
+                <div class="carousel-caption"  style="bottom:0"> $value['title'] </div>
+              </div>
+              {eval $i++} 
+              <!--{/loop}--> 
+            </div>
+            
+            <!-- Controls --> 
+            <a class="left carousel-control" href="#carousel-generic" role="button" data-slide="prev" style="background:none;font-size:30px;"> <span class="glyphicon glyphicon-chevron-left"></span> </a> <a class="right carousel-control" href="#carousel-generic" role="button" data-slide="next" style="background:none;font-size:30px;"> <span class="glyphicon glyphicon-chevron-right"></span> </a> </div>
+        </div>
+         <!--{if $news['votestatus']}-->
+        <div class="content-vote" id="vote_container">
+            <script> ajaxget('{DZZSCRIPT}?mod=dzzvote&op=ajax&do=getvote&id=$news[newid]&idtype=news','vote_container','vote_container')</script>
+        </div>
+        <!--{/if}--> 
+      </div>
+      <div class="content-image-extra" style="background:#FFF;margin:0;">
+        <div class="content-info clearfix" style="padding:20px">
+          <div class="info-item">
+            <div class="pull-left"><strong>信息：</strong></div>
+            <div class="info-item-publish"> <span>$news[author] 发布于 {eval echo dgmdate($news[dateline],'u');}</span> 
+              <!--{if $news['opuid']}--> 
+              <span class="pipe">|</span> <span>$news[opauthor] 修改于 {eval echo dgmdate($news[updatetime],'u');}</span> 
+              <!--{/if}--> 
+              <!--{if $news['moduid']}--> 
+              <span class="pipe">|</span> <span> $news[modusername] 审核于 {eval echo dgmdate($news[modtime],'u');}</span> 
+              <!--{/if}--> 
+              <!--{if $news['catname']}--> 
+              <span class="pipe">|</span> <span>分类：$news['catname']</span> 
+              <!--{/if}--> 
+            </div>
+          </div>
+          <div class="info-item " style="padding:0">
+            <div class="pull-left"><strong>范围：</strong></div>
+            <div class="info-item-org"> 
+              <!--{if !$sel_org}--> 
+              <span >全部</span> 
+              <!--{else}--> 
+              <!--{loop $sel_org $value}--> 
+              <span > 
+              <!--{if $value['forgid']}--> 
+              <img src="dzz/system/images/department.png" /> 
+              <!--{else}--> 
+              <img src="dzz/system/images/organization.png" /> 
+              <!--{/if}--> 
+              $value[orgname] </span> 
+              <!--{/loop}--> 
+              <!--{loop $sel_user $value1}--> 
+              <span> <img src="dzz/system/images/user.png" /> $value1[username] </span> 
+              <!--{/loop}--> 
+              <!--{/if}--> 
+            </div>
+          </div>
+        </div>
+        
+        <!--{if $_G['uid']}--> 
+        <!--{if $news['commentstatus']}-->
+        <ul class="nav nav-underline" role="tablist">
+          <li class="active"><a href="#comment" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-comment"></i> 评论</a></li>
+          <li><a href="#view" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-eye-open"></i> 查阅情况</a></li>
+        </ul>
+        <!--{else}-->
+        <ul class="nav nav-underline" role="tablist">
+          <li class="active"><a href="#view" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-eye-open"></i> 查阅情况</a></li>
+        </ul>
+        <!--{/if}--> 
+        <!-- Tab panes -->
+        <div class="tab-content"> 
+          <!--{if $news['commentstatus']}-->
+          <div class="tab-pane active" id="comment">
+            <div class="content-comment"> <a name="comment_container"></a>
+              <div id="comment_container" class="document-comment clearfix"> 
+                <script type="text/javascript"> ajaxget('{DZZSCRIPT}?mod=comment&op=ajax&do=getcomment&idtype=news&id=$news[newid]&allowattach=3&allowat=0&allowsmiley=1','comment_container','comment_container')</script> 
+              </div>
+              <!--{if $news['commentstatus']}--> 
+              <a name="comment_reply_form"></a>
+              <div id="comment_reply_form" class="comment-reply-form clearfix">
+                <div class="itemfeed" >
+                  <div class="left_ifed"> <a href="user.php?uid=$_G[uid]" title="$_G[username]" hidefocus="true"><img width="50" height="50" src="avatar.php?uid=$_G[uid]" alt="$_G[username]"></a> </div>
+                  <div  class="cmt_fed right-ifed" id="documnet_reply"> 
+                    <script type="text/javascript">ajaxget('{DZZSCRIPT}?mod=comment&op=ajax&do=getPublishForm&id=$news[newid]&idtype=news&allowattach=3&allowat=0&allowsmiley=1','documnet_reply','documnet_reply')</script> 
+                  </div>
+                </div>
+              </div>
+              <!--{/if}--> 
+            </div>
+          </div>
+          <!--{/if}-->
+          <div class="tab-pane clearfix <!--{if !$news['commentstatus']}-->active <!--{/if}-->" id="view" style="padding:20px">
+           	<script type="text/javascript">ajaxget('{DZZSCRIPT}?mod=news&op=ajax&do=getViewerByNewid&newid=$newid','view','view');</script>
+          </div>
+        </div>
+        <!--{/if}--> 
+        
+      </div>
+      
+      <!--{/if}--> 
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+jQuery('.left-drager').leftDrager_layout(null,{'cookieid':'news_view'});
+jQuery(document).ready(function(e) {
+   
+  //更新浏览数
+  jQuery(document).on('click','.share_to_desktop',function(){
+	  jQuery.getJSON(DZZSCRIPT+'?mod=system&op=dzzcp&do=linktodesktop&link='+encodeURIComponent(this.href),function(json){
+		  if(json.error){
+			  alert(json.error);
+		  }else{
+			  try{
+				  parent._ico.createIco(json);
+				 parent.showmessage('成功添加桌面快捷方式','success',3000,1);
+			  }catch(e){
+				  alert('成功添加桌面快捷方式');
+			  }
+		  }
+	  });
+	  return false;
+  });
+  uParse('.content-document-body',{'rootPath':'dzz/system/ueditor'});
+  dzzattach.init('.content-document-body');
+});
+
+</script> 
+<script type="text/javascript" src="dzz/news/scripts/news.js?{VERHASH}"></script> 
+<script type="text/javascript" src="dzz/system/ueditor/ueditor.parse.js?{VERHASH}"></script>
+<script src="dzz/system/ueditor/third-party/dzzattach/dzzattach.js?{VERHASH}" type="text/javascript"></script>
+<!--{if $news['commentstatus']}--> 
+<script src="dzz/comment/scripts/comment.js?{VERHASH}" type="text/javascript"></script> 
+<script type="text/javascript"  src="static/js/smilies.js?{VERHASH}"></script> 
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included --> 
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.ui.widget.js?{VERHASH}"></script> 
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.iframe-transport.js?{VERHASH}"></script> 
+<!-- The basic File Upload plugin --> 
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.fileupload.js?{VERHASH}"></script> 
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.fileupload-process.js?{VERHASH}"></script> 
+<script type="text/javascript" src="dzz/scripts/jquery_file_upload/jquery.fileupload-validate.js?{VERHASH}"></script> 
+<!--{/if}--> 
+<script src="static/bootstrap/js/bootstrap.min.js?{VERHASH}"></script> 
+<!--codestrings--> 
+<!--{template common/footer_simple}--> 

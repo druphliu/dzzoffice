@@ -1,0 +1,14 @@
+<ul class="nav nav-pills nav-pills-bottomguide">
+    <li><ol class="breadcrumb" style="margin:0;background:none;padding:9px 15px">
+          <li><a href="{DZZSCRIPT}?mod=news">信息中心</a></li>
+          <!--{if $navlast}--><li class="active text-overflow">$navlast</li><!--{/if}-->
+        </ol>
+    </li>
+     <!--<!--{if $perm>1 || $news['authorid']==$_G['uid']}--><li class="pull-right"> <a href="{DZZSCRIPT}?mod=news&op=edit&newid=$news[newid]" ><i class="glyphicon glyphicon-edit" ></i> 编辑</a></li><!--{/if}-->
+    </li>-->
+    <!--{if empty($ismobile)}-->
+    <li class="pull-right">
+      <a   href="$refer" ><i class="glyphicon glyphicon-chevron-left"></i> 返回</a>
+     </li>
+     <!--{/if}-->
+  </ul>

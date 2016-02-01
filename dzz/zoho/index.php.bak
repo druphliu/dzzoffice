@@ -1,0 +1,65 @@
+<?php
+/*
+ * @copyright   Leyun internet Technology(Shanghai)Co.,Ltd
+ * @license     http://www.dzzoffice.com/licenses/license.txt
+ * @package     DzzOffice
+ * @link        http://www.dzzoffice.com
+ * @author      zyx(zyx@dzz.cc)
+ */
+if(!defined('IN_DZZ')) {
+	exit('Access Denied');
+}
+if($_GET['do']=='savefile'){
+	$path=dzzdecode($_GET['path']);
+	$cache='./cache/'.md5($path).'.tmp';
+	$_G['uid']=intval($_GET['id']);
+	$tmp_filename = $_FILES['content']['tmp_name']; 
+	$msg='';
+	$upload_status = move_uploaded_file($tmp_filename, $_G['setting']['attachdir'].$cache); 
+	if(!$upload_status){
+		$msg='save failure!';
+	}
+	$content=file_get_contents($_G['setting']['attachdir'].$cache);
+	if(!$msg && ($re=IO::setFileContent($path,$content))){
+		if($re['error']) $msg=$re['error'];
+		@unlink($_G['setting']['attachdir'].$cache);
+	}
+	if($msg){
+		@header('HTTP/1.1 500 Not Found');
+		@header('Status: 500 Not Found');
+		exit();
+	}else{
+		@header('HTTP/1.1 200 Not Found');
+		exit();
+	}
+}
+$ZohoAPIKey=''; //将申请到的zoho,地址https://zapi.zoho.com/apigen.do
+
+$docexts=array('doc', 'docx', 'rtf', 'odt', 'htm', 'html', 'txt');
+$sheetexts=array('xls', 'xlsx', 'ods', 'sxc', 'csv', 'tsv');
+$showexts=array('ppt', 'pptx', 'pps', 'ppsx', 'odp', 'sxi');
+
+$path=dzzdecode(rawurldecode($_GET['path']));
+
+$data=IO::getMeta($path);
+if(!perm_check::checkperm('edit',$data)){
+	$mode='view';
+}else{
+	$mode='normaledit';
+}
+$posturl='';
+if(in_array($data['ext'],$docexts)){
+	$posturl='https://exportwriter.zoho.com/remotedoc.im';
+}elseif(in_array($data['ext'],$sheetexts)){
+	$posturl='https://sheet.zoho.com/remotedoc.im';
+}elseif(in_array($data['ext'],$showexts)){
+	$posturl='https://show.zoho.com/remotedoc.im';
+}else{
+	showmessage('不支持的格式');
+}
+$stream=$_G['siteurl'].DZZSCRIPT.'?mod=io&op=getStream&path='.dzzencode($path);
+$length=strlen($content);
+$saveurl=$_G['siteurl'].DZZSCRIPT.'?mod=zoho&do=savefile&path='.dzzencode($path);
+include template('zohoedit');
+
+?>
