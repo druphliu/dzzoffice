@@ -239,8 +239,134 @@ class logging_ctl {
 			showmessage('logout_succeed', dreferer(), array('formhash' => FORMHASH));
 		}
 	}
-	
 
+	function api_login()
+	{
+		global $_G, $_POST;
+		if($_POST){
+			if (!empty($_POST['auth'])) {
+				list($_POST['email'], $_POST['password']) = daddslashes(explode("\t", authcode($_POST['auth'], 'DECODE')));
+			}
+
+			if (!($_G['member_loginperm'] = logincheck($_GET['username']))) {
+				json_error(lang('message','login_strike'));
+			}
+			$_G['uid'] = $_G['member']['uid'] = 0;
+			$_G['username'] = $_G['member']['username'] = $_G['member']['password'] = '';
+			if (!$_POST['password'] || $_POST['password'] != addslashes($_POST['password'])) {
+				json_error(lang('message','profile_passwd_illegal'));
+			}
+			$result = userlogin($_POST['email'], $_POST['password'], $_POST['questionid'], $_POST['answer'], 'auto', $_G['clientip']);
+			$uid = $result['ucresult']['uid'];
+
+
+			if ($result['status'] == -1) { //不可能发生；
+				if (!$this->setting['fastactivation']) {
+					$auth = authcode($result['ucresult']['username'] . "\t" . FORMHASH, 'ENCODE');
+					json_error(lang('message','location_activation'));
+				} else {
+					$init_arr = explode(',', $this->setting['initcredits']);
+					$groupid = $this->setting['regverify'] ? 8 : $this->setting['newusergroupid'];
+
+					C::t('user')->insert($uid, $result['ucresult']['username'], md5(random(10)), $result['ucresult']['email'], $_G['clientip'], $groupid, $init_arr);
+					$result['member'] = getuserbyuid($uid);
+					$result['status'] = 1;
+				}
+			} elseif ($result['status'] == -2) {
+				json_error('此用户已停用，请联系管理员');
+			} elseif ($_G['setting']['bbclosed'] > 0 && $result['member']['adminid'] != 1) {
+				json_error('站点关闭中，请联系管理员');
+			}
+
+			if ($result['status'] > 0) {
+
+				if ($this->extrafile && file_exists($this->extrafile)) {
+					require_once $this->extrafile;
+				}
+
+				setloginstatus($result['member'], $_GET['cookietime'] ? 2592000 : 0);
+
+				if ($_G['member']['lastip'] && $_G['member']['lastvisit']) {
+					dsetcookie('lip', $_G['member']['lastip'] . ',' . $_G['member']['lastvisit']);
+				}
+				C::t('user_status')->update($_G['uid'], array('lastip' => $_G['clientip'], 'lastvisit' => TIMESTAMP, 'lastactivity' => TIMESTAMP));
+
+
+				$param = array(
+					'username' => $result['ucresult']['username'],
+					'usergroup' => $_G['group']['grouptitle'],
+					'uid' => $_G['member']['uid'],
+					'groupid' => $_G['groupid'],
+					'syn' => 0
+				);
+
+				$extra = array(
+					'showdialog' => true,
+					'locationtime' => true,
+					'extrajs' => ''
+				);
+
+				$loginmessage = $_G['groupid'] == 8 ? 'login_succeed_inactive_member' : 'login_succeed';
+
+				$location = $_G['groupid'] == 8 ? 'index.php?open=password' : dreferer();
+				$token = 111;
+				$data = array(
+					'username'=>$result['ucresult']['username'],
+					'uid'=>$_G['member']['uid'],
+					'token'=>$token
+				);
+				if (empty($_GET['handlekey']) || !empty($_GET['lssubmit'])) {
+					if (defined('IN_MOBILE')) {
+						json_success(t($loginmessage),$data);
+					} else {
+						if (!empty($_GET['lssubmit'])) {
+
+							json_success(t($loginmessage),$data);
+						} else {
+
+							json_success(t('location_login_succeed'),$data);
+						}
+					}
+				} else {
+					json_success(t($loginmessage),$data);
+				}
+			} else {
+				$password = preg_replace("/^(.{" . round(strlen($_GET['password']) / 4) . "})(.+?)(.{" . round(strlen($_GET['password']) / 6) . "})$/s", "\\1***\\3", $_GET['password']);
+				$errorlog = dhtmlspecialchars(
+					TIMESTAMP . "\t" .
+					($result['ucresult']['email'] ? $result['ucresult']['email'] : $_GET['email']) . "\t" .
+					$password . "\t" .
+					"Ques #" . intval($_GET['questionid']) . "\t" .
+					$_G['clientip']);
+				writelog('illegallog', $errorlog);
+				loginfailed($_GET['username']);
+
+				$fmsg = $result['ucresult']['uid'] == '-3' ? (empty($_GET['questionid']) || $answer == '' ? 'login_question_empty' : 'login_question_invalid') : 'login_invalid';
+				if ($_G['member_loginperm'] > 1) {
+					json_error(lang($fmsg));
+				} elseif ($_G['member_loginperm'] == -1) {
+					json_error(lang('login_password_invalid'));
+				} else {
+					json_error(lang('login_strike'));
+				}
+			}
+		}else{
+			json_error('异常登录');
+		}
+
+	}
+
+	function api_logout()
+	{
+		global $_G;
+
+		clearcookies();
+
+		$_G['groupid'] = $_G['member']['groupid'] = 7;
+		$_G['uid'] = $_G['member']['uid'] = 0;
+		$_G['username'] = $_G['member']['username'] = $_G['member']['password'] = '';
+		json_success(t('logout_succeed'));
+	}
 }
 
 class register_ctl {
