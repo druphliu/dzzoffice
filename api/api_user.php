@@ -10,10 +10,12 @@ if(!defined('IN_DZZ')) {
 }
 define('CURSCRIPT', 'user');
 require libfile('class/user');
+require libfile('function/user');
 define('NOROBOT', TRUE);
-if(!in_array($_GET['action'], array('login', 'logout'))) {
+if(!in_array($_GET['action'], array('login', 'logout','userInfo'))) {
     $_GET['action']='login';
 }
+$_POST = json_decode(file_get_contents('php://input'),true);
 $ctl_obj = new logging_ctl();
 $ctl_obj->setting = $_G['setting'];
 $method = 'api_'.$_GET['action'];

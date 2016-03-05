@@ -22,7 +22,9 @@ $dzz->init();
 if (@!file_exists(DZZ_ROOT . './api/api_' . $mod . '.php')) {
     json_error(lang('message', 'undefined_action'));
 }
-
+//根据token检查是否处于登录状态
+$token = isset($_SERVER['HTTP_X_AUTH_TOKEN'])?$_SERVER['HTTP_X_AUTH_TOKEN']:'';
+check_user_status($token);
 require DZZ_ROOT . './api/api_' . $mod . '.php';
 
 function json_error($t)
@@ -40,4 +42,13 @@ function json_message($status, $message, $data = array())
     return json_encode(array('status' => $status, 'message' => $message, 'data' => $data));
 }
 
+function check_user_status($token)
+{
+    global $_G;
+    $uid = DB::result_first('SELECT uid FROM %t WHERE token=%s', array('user_token', $token));
+    $userInfo = C::t('user')->fetch_by_uid($uid);
+    $_G['uid'] = $uid;
+    $_G['username'] = $userInfo['username'];
+    $_G['phone']  = $userInfo['phone'];
+}
 ?>

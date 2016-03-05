@@ -243,6 +243,7 @@ class logging_ctl {
 	function api_login()
 	{
 		global $_G, $_POST;
+
 		if($_POST){
 			if (!empty($_POST['auth'])) {
 				list($_POST['email'], $_POST['password']) = daddslashes(explode("\t", authcode($_POST['auth'], 'DECODE')));
@@ -256,7 +257,8 @@ class logging_ctl {
 			if (!$_POST['password'] || $_POST['password'] != addslashes($_POST['password'])) {
 				json_error(lang('message','profile_passwd_illegal'));
 			}
-			$result = userlogin($_POST['email'], $_POST['password'], $_POST['questionid'], $_POST['answer'], 'auto', $_G['clientip']);
+			$username = $_POST['uname'];
+			$result = userlogin($username , $_POST['password'], $_POST['questionid'], $_POST['answer'], 'auto', $_G['clientip']);
 			$uid = $result['ucresult']['uid'];
 
 
@@ -279,7 +281,7 @@ class logging_ctl {
 			}
 
 			if ($result['status'] > 0) {
-
+				$token = md5($_G['uid'].time());
 				if ($this->extrafile && file_exists($this->extrafile)) {
 					require_once $this->extrafile;
 				}
@@ -290,8 +292,14 @@ class logging_ctl {
 					dsetcookie('lip', $_G['member']['lastip'] . ',' . $_G['member']['lastvisit']);
 				}
 				C::t('user_status')->update($_G['uid'], array('lastip' => $_G['clientip'], 'lastvisit' => TIMESTAMP, 'lastactivity' => TIMESTAMP));
-
-
+				$tokenExit = DB::result_first('SELECT token FROM %t WHERE uid=%s', array('user_token', $_G['uid']));
+				$time = time();
+				if($tokenExit){
+					DB::query('update %t set token=%s,created_at=%s where uid=%s',array('user_token',$token,$time,$_G['uid']));
+				}else{
+					//C::t('user_token')->insert(array('token'=>$token,'created_at'=>time(),'uid'=>$_G['uid']));
+					DB::query('insert into %t values(%s,%s,%s)',array('user_token',$_G['uid'],$token,$time));
+				}
 				$param = array(
 					'username' => $result['ucresult']['username'],
 					'usergroup' => $_G['group']['grouptitle'],
@@ -309,7 +317,6 @@ class logging_ctl {
 				$loginmessage = $_G['groupid'] == 8 ? 'login_succeed_inactive_member' : 'login_succeed';
 
 				$location = $_G['groupid'] == 8 ? 'index.php?open=password' : dreferer();
-				$token = 111;
 				$data = array(
 					'username'=>$result['ucresult']['username'],
 					'uid'=>$_G['member']['uid'],
@@ -317,18 +324,18 @@ class logging_ctl {
 				);
 				if (empty($_GET['handlekey']) || !empty($_GET['lssubmit'])) {
 					if (defined('IN_MOBILE')) {
-						json_success(t($loginmessage),$data);
-					} else {
+						json_success(lang($loginmessage),$data);
+					} else {echo 2;
 						if (!empty($_GET['lssubmit'])) {
 
-							json_success(t($loginmessage),$data);
+							json_success(lang($loginmessage),$data);
 						} else {
 
-							json_success(t('location_login_succeed'),$data);
+							json_success(lang('location_login_succeed'),$data);
 						}
 					}
 				} else {
-					json_success(t($loginmessage),$data);
+					json_success(lang($loginmessage),$data);
 				}
 			} else {
 				$password = preg_replace("/^(.{" . round(strlen($_GET['password']) / 4) . "})(.+?)(.{" . round(strlen($_GET['password']) / 6) . "})$/s", "\\1***\\3", $_GET['password']);
@@ -366,6 +373,10 @@ class logging_ctl {
 		$_G['uid'] = $_G['member']['uid'] = 0;
 		$_G['username'] = $_G['member']['username'] = $_G['member']['password'] = '';
 		json_success(t('logout_succeed'));
+	}
+
+	function api_userInfo(){
+		json_success('success',array('uid'=>2,'username'=>'test','token'=>111));
 	}
 }
 
