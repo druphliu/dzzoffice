@@ -325,7 +325,7 @@ class logging_ctl {
 				if (empty($_GET['handlekey']) || !empty($_GET['lssubmit'])) {
 					if (defined('IN_MOBILE')) {
 						json_success(lang($loginmessage),$data);
-					} else {echo 2;
+					} else {
 						if (!empty($_GET['lssubmit'])) {
 
 							json_success(lang($loginmessage),$data);
@@ -376,6 +376,8 @@ class logging_ctl {
 	}
 
 	function api_userInfo(){
+		global $_G;
+		$uid = $_GET['uid'];
 		json_success('success',array('uid'=>2,'username'=>'test','token'=>111));
 	}
 }

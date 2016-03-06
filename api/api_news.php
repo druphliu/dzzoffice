@@ -91,6 +91,7 @@ switch ($action) {
                 C::t('news_viewer')->insert($addviewer);
             }
         }
+        $news['dateline'] = dgmdate($news[dateline],'u');
         $data = $news;
         $message = 'success';
         break;
@@ -112,7 +113,7 @@ function catList($catid = 0,$sql,$param)
     $params = array('news');
     $params[] = 'news_viewer';
     $params[] = $_G['uid'];
-    $params = array_merge_recursive($params,$param);
+    $params = $param ? array_merge_recursive($params, $param) : $params;
     foreach (C::t('news_cat')->fetch_all_by_pid($catid) as $value) {
         $catids = $common='';
         $result[$value['catid']] = $value;
