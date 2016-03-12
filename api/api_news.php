@@ -61,12 +61,14 @@ switch ($action) {
         break;
     case 'list':
         $catid = empty($_GET['catid']) ? 0 : intval($_GET['catid']);
+        $isHistory = empty($_GET['isHistory']) ? 0 : 1;
         if($catid==0)
             json_error('分类不存在');
         $subids=C::t('news_cat')->getSonByCatid($catid);
         $sql.=' and catid IN(%n)';
         $param[]=$subids;
         $sql.=" and status='1'";
+        $sql = !$isHistory ? $sql . ' and v.vid is null' : $sql;
         $data = listView($sql,$param);
         $message = 'success';
         break;
@@ -139,7 +141,7 @@ function listView($sql,$param){
     global $_G;
     //查询
     $orderby="ORDER BY n.istop DESC , n.dateline DESC";
-    $perpage=20;
+    $perpage=2;
     $page = empty($_GET['page'])?1:intval($_GET['page']);
     $start=($page-1)*$perpage;
     $params = array('news');
@@ -161,6 +163,7 @@ function listView($sql,$param){
             if($value['opuid'] && $opuser=getuserbyuid($value['opuid'])){
                 $value['opauthor']=$opuser['username'];
             }
+            $value['dateDiff'] = dgmdate($value[dateline],'u');
             $data[]=$value;
         }
     }

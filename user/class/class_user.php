@@ -320,7 +320,9 @@ class logging_ctl {
 				$data = array(
 					'username'=>$result['ucresult']['username'],
 					'uid'=>$_G['member']['uid'],
-					'token'=>$token
+					'token'=>$token,
+					'avatar' =>$_G['config']['common']['home_url'].'/'.avatar($_G['member']['uid'],'middle',true),
+					'email'=>$result['ucresult']['email']
 				);
 				if (empty($_GET['handlekey']) || !empty($_GET['lssubmit'])) {
 					if (defined('IN_MOBILE')) {
@@ -378,7 +380,9 @@ class logging_ctl {
 	function api_userInfo(){
 		global $_G;
 		$uid = $_GET['uid'];
-		json_success('success',array('uid'=>2,'username'=>'test','token'=>111));
+		$user = C::t('user')->fetch_by_uid($uid);
+		$user['avatar'] = $_G['config']['common']['home_url'].'/'.avatar($uid,'middle',true);
+		json_success('success',$user);
 	}
 }
 
